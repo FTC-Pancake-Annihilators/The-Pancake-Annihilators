@@ -1,3 +1,33 @@
+/// Gamepad1 – Driver (Drive):
+
+   ///     Left stick Y → forward/backward
+
+  ///      Right stick X → turn
+
+   ///     Left trigger → slow mode (50%)
+
+     ///   Right trigger → normal mode (100%, overrides slow)
+
+     ///   Gamepad2 – Operator (Mechanisms):
+
+    ///    Intake: Y = in, A = out, release = stop
+
+     ///   Advancers: X = both in, release = stop
+
+    ///    Shooter: RB = far (0.75), LB = near (0.4), release = stop
+
+    ///    Double-blip rumble on shooter button press
+
+   ///     Telemetry:
+
+    ////    Combines Shooter / Intake / Advancers into one line
+
+      ///  Shows Drive powers and Drive mode
+
+       /// All motors stop immediately on release, as described.
+
+
+
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
