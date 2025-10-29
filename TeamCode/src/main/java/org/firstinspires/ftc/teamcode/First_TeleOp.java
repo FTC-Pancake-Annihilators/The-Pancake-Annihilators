@@ -11,11 +11,11 @@ import com.qualcomm.robotcore.util.Range;
 public class First_TeleOp extends LinearOpMode {
     @Override
     public void runOpMode(){
-        DcMotor leftMotor = hardwareMap.get(DcMotor.class, "left_motor");
-        DcMotor rightMotor = hardwareMap.get(DcMotor.class, "right_motor");
-        DcMotor intakeMotor = hardwareMap.get(DcMotor.class, "intake_motor");
-        CRServo  rightAdvancer = hardwareMap.get(CRServo.class, "right_advancer");
-        CRServo  leftAdvancer =  hardwareMap.get(CRServo.class, "left_advancer");
+        DcMotor leftMotor = hardwareMap.get(DcMotor.class, "leftMotor");
+        DcMotor rightMotor = hardwareMap.get(DcMotor.class, "rightMotor");
+        DcMotor intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
+        CRServo  rightAdvancer = hardwareMap.get(CRServo.class, "rightAdvancer");
+        CRServo  leftAdvancer =  hardwareMap.get(CRServo.class, "leftAdvancer");
         DcMotor shooter = hardwareMap.get(DcMotor.class, "shooter");
 
         double drive;
