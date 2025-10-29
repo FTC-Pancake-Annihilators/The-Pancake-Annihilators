@@ -27,6 +27,7 @@ public class TeleOp_Final extends LinearOpMode {
     private String intakeStatus = "OFF";
     private String advancerStatus = "OFF";
 
+    ///  Use Enums the way u are told.
     @Override
     public void runOpMode() {
 
