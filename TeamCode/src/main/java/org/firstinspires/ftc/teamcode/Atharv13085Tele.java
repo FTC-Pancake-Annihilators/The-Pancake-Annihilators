@@ -34,14 +34,8 @@ public class TeleOp_Final extends LinearOpMode {
 
     private final double FAR_POWER  = 0.75;
     private final double NEAR_POWER = 0.4;
-
-    // Status variables declared once at class level
-    private String shooterStatus = "OFF";
-    private String intakeStatus = "OFF";
-    private String advancerStatus = "OFF";
     
 
-    ///  TODO: Use Enums instead of strings
     @Override
     public void runOpMode() {
 
@@ -123,10 +117,6 @@ public class TeleOp_Final extends LinearOpMode {
 
             // --- TELEMETRY ---
             // Reassign values (no redeclaration)
-            
-            shooterStatus  = gamepad2.right_bumper ? "FAR" : gamepad2.left_bumper ? "NEAR" : "OFF";
-            intakeStatus   = gamepad2.y ? "IN" : gamepad2.a ? "OUT" : "OFF";
-            advancerStatus = gamepad2.x ? "IN" : "OFF";
 
             telemetry.addData("Status", "Shooter: %s | Intake: %s | Advancers: %s",
                     shooterStatus, intakeStatus, advancerStatus);
