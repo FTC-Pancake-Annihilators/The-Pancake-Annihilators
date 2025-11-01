@@ -35,7 +35,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 
@@ -47,7 +46,7 @@ public class TeleOp_Final extends LinearOpMode {
     private DcMotor leftMotor, rightMotor;
     private DcMotor intakeMotor;
     private CRServo leftAdvancer, rightAdvancer;
-    private DcMotorEx shooter;
+    private DcMotor shooter;
 
     private final double FAR_POWER  = 0.75;
     private final double NEAR_POWER = 0.4;
@@ -64,9 +63,11 @@ public class TeleOp_Final extends LinearOpMode {
         // DRIVE MOTORS
         leftMotor  = hardwareMap.get(DcMotor.class, "leftMotor");
         rightMotor = hardwareMap.get(DcMotor.class, "rightMotor");
+        shooter = hardwareMap.get(DcMotor.class, "shooter");
 
-        leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        shooter.setDirection(DcMotor.Direction.REVERSE);
         leftMotor.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
         rightMotor.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
 
@@ -74,9 +75,10 @@ public class TeleOp_Final extends LinearOpMode {
         intakeMotor   = hardwareMap.get(DcMotor.class, "intakeMotor");
         leftAdvancer  = hardwareMap.get(CRServo.class, "leftAdvancer");
         rightAdvancer = hardwareMap.get(CRServo.class, "rightAdvancer");
+        rightAdvancer.setDirection(CRServo.Direction.REVERSE);
 
         // SHOOTER
-        shooter = hardwareMap.get(DcMotorEx.class, "shooter");
+
 
         telemetry.addLine("Initialized ✅");
         telemetry.update();
@@ -85,11 +87,11 @@ public class TeleOp_Final extends LinearOpMode {
         while (opModeIsActive()) {
 
             // --- DRIVE (Gamepad1) ---
-            double drive = -gamepad1.left_stick_y;
+            double drive =  gamepad1.left_stick_y;
             double turn  = gamepad1.right_stick_x;
 
             // Determine speed mode
-            double speedScale = 1.0; // default full speed
+            double speedScale = 0.7; // default full speed
             if (gamepad1.left_trigger > 0.2) speedScale = 0.5;  // slow
             if (gamepad1.right_trigger > 0.2) speedScale = 1.0; // normal (override slow)
 
