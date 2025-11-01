@@ -65,8 +65,8 @@ public class TeleOp_Final extends LinearOpMode {
         rightMotor = hardwareMap.get(DcMotor.class, "rightMotor");
         shooter = hardwareMap.get(DcMotor.class, "shooter");
 
-        leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         shooter.setDirection(DcMotor.Direction.REVERSE);
         leftMotor.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
         rightMotor.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
@@ -75,6 +75,7 @@ public class TeleOp_Final extends LinearOpMode {
         intakeMotor   = hardwareMap.get(DcMotor.class, "intakeMotor");
         leftAdvancer  = hardwareMap.get(CRServo.class, "leftAdvancer");
         rightAdvancer = hardwareMap.get(CRServo.class, "rightAdvancer");
+        rightAdvancer.setDirection(CRServo.Direction.REVERSE);
 
         // SHOOTER
 
@@ -90,7 +91,7 @@ public class TeleOp_Final extends LinearOpMode {
             double turn  = gamepad1.right_stick_x;
 
             // Determine speed mode
-            double speedScale = 1.0; // default full speed
+            double speedScale = 0.7; // default full speed
             if (gamepad1.left_trigger > 0.2) speedScale = 0.5;  // slow
             if (gamepad1.right_trigger > 0.2) speedScale = 1.0; // normal (override slow)
 

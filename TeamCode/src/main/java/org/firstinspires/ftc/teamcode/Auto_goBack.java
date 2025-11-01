@@ -8,8 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 @Autonomous(name="Back_Auto", group="Auto")
 public class Auto_goBack extends OpMode {
 
-    DcMotor leftMotor = hardwareMap.get(DcMotor.class, "leftMotor");
-    DcMotor rightMotor = hardwareMap.get(DcMotor.class, "rightMotor");
+    private DcMotor leftMotor;
+    private DcMotor rightMotor;
+
     @Override
     public void init() {
         leftMotor = hardwareMap.get(DcMotor.class, "leftMotor");
@@ -17,10 +18,13 @@ public class Auto_goBack extends OpMode {
 
         leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightMotor.setDirection(DcMotor.Direction.FORWARD);
+
 
     }
 
@@ -29,6 +33,14 @@ public class Auto_goBack extends OpMode {
 
         leftMotor.setTargetPosition(-45 * 87);
         rightMotor.setTargetPosition(-45 * 87);
+
+//        if (leftMotor.isBusy()) {
+//            leftMotor.setPower(0.4);
+//            rightMotor.setPower(0.4);
+//        }
+
+        leftMotor.setPower(0.4);
+        rightMotor.setPower(0.4);
 
 
     }
