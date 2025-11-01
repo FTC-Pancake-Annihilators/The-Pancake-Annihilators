@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-
+@Autonomous(name="Front_Auto", group="Auto")
 public class Auto_goFront extends OpMode {
 
     DcMotor leftMotor = hardwareMap.get(DcMotor.class, "leftMotor");
