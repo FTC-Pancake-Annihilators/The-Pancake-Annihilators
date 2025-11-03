@@ -28,7 +28,7 @@
 
 
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.MainOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -40,13 +40,12 @@ import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.Config;
+
 @TeleOp(name="TeleOp_Final_NoRumble", group="TELEOP")
 public class TeleOp_Final extends LinearOpMode {
+    private Config config;
 
-    private DcMotor leftMotor, rightMotor;
-    private DcMotor intakeMotor;
-    private CRServo leftAdvancer, rightAdvancer;
-    private DcMotor shooter;
 
     private final double FAR_POWER  = 0.75;
     private final double NEAR_POWER = 0.4;
@@ -59,25 +58,8 @@ public class TeleOp_Final extends LinearOpMode {
     ///  Use Enums the way u are told.
     @Override
     public void runOpMode() {
+    config = new Config(hardwareMap);
 
-        // DRIVE MOTORS
-        leftMotor  = hardwareMap.get(DcMotor.class, "leftMotor");
-        rightMotor = hardwareMap.get(DcMotor.class, "rightMotor");
-        shooter = hardwareMap.get(DcMotor.class, "shooter");
-
-        leftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        shooter.setDirection(DcMotor.Direction.REVERSE);
-        leftMotor.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        rightMotor.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-
-        // INTAKE + ADVANCERS
-        intakeMotor   = hardwareMap.get(DcMotor.class, "intakeMotor");
-        leftAdvancer  = hardwareMap.get(CRServo.class, "leftAdvancer");
-        rightAdvancer = hardwareMap.get(CRServo.class, "rightAdvancer");
-        rightAdvancer.setDirection(CRServo.Direction.REVERSE);
-
-        // SHOOTER
 
 
         telemetry.addLine("Initialized ✅");
@@ -98,34 +80,34 @@ public class TeleOp_Final extends LinearOpMode {
             double leftPower  = Range.clip((drive*speedScale) - (turn*speedScale), -1, 1);
             double rightPower = Range.clip((drive*speedScale) + (turn*speedScale), -1, 1);
 
-            leftMotor.setPower(leftPower);
-            rightMotor.setPower(rightPower);
+            config.leftMotor.setPower(leftPower);
+            config.rightMotor.setPower(rightPower);
 
             // --- INTAKE (Gamepad2) ---
             if (gamepad2.y) {
-                intakeMotor.setPower(1); // intake in
+                config.intakeMotor.setPower(1); // intake in
             } else if (gamepad2.a) {
-                intakeMotor.setPower(-1); // intake out
+                config.intakeMotor.setPower(-1); // intake out
             } else {
-                intakeMotor.setPower(0);  // stop
+                config.intakeMotor.setPower(0);  // stop
             }
 
             // --- ADVANCERS (Gamepad2) ---
             if (gamepad2.x) {
-                leftAdvancer.setPower(-1);
-                rightAdvancer.setPower(1);
+                config.leftAdvancer.setPower(-1);
+                config.rightAdvancer.setPower(1);
             } else {
-                leftAdvancer.setPower(0);
-                rightAdvancer.setPower(0);
+                config.leftAdvancer.setPower(0);
+                config.rightAdvancer.setPower(0);
             }
 
             // --- SHOOTER (Gamepad2) ---
             if (gamepad2.right_bumper) {
-                shooter.setPower(FAR_POWER);
+                config.shooter.setPower(FAR_POWER);
             } else if (gamepad2.left_bumper) {
-                shooter.setPower(NEAR_POWER);
+                config.shooter.setPower(NEAR_POWER);
             } else {
-                shooter.setPower(0);
+                config.shooter.setPower(0);
             }
 
             // --- TELEMETRY ---
