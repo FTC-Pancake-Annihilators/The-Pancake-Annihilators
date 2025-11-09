@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.har
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Config {
@@ -23,17 +24,20 @@ public class Config {
 public DcMotor leftMotor;
 public DcMotor rightMotor;
 public DcMotor intakeMotor;
-public DcMotor shooter;
+public DcMotorEx shooter;
 public CRServo leftAdvancer;
 public CRServo rightAdvancer;
 public final double FAR_POWER  = 0.75;
 public final double NEAR_POWER = 0.4;
 
+public final double Far_Velo = 1750;
+public final double Near_Velo = Far_Velo / 2;
+
 public Config(HardwareMap complex_map) {
     leftMotor = complex_map.get(DcMotor.class, "leftMotor");
     rightMotor = complex_map.get(DcMotor.class, "rightMotor");
     intakeMotor = complex_map.get(DcMotor.class, "intakeMotor");
-    shooter = complex_map.get(DcMotor.class, "shooter");
+    shooter = complex_map.get(DcMotorEx.class, "shooter");
     leftAdvancer = complex_map.get(CRServo.class, "leftAdvancer");
     rightAdvancer = complex_map.get(CRServo.class, "rightAdvancer");
     leftMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -41,6 +45,8 @@ public Config(HardwareMap complex_map) {
     shooter.setDirection(DcMotor.Direction.REVERSE);
     leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
 
 }
 

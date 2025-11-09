@@ -47,8 +47,12 @@ public class TeleOp_Final extends LinearOpMode {
     private Config config;
 
 
-    private final double FAR_POWER  = 0.75;
+    private final double Far_POWER  = 0.75;
+    private final double Far_Velo  = 1750;
+    private final double Near_Velo  = Far_Velo / 2;
+
     private final double NEAR_POWER = 0.4;
+
 
     // Status variables declared once at class level
     private String shooterStatus = "OFF";
@@ -74,7 +78,7 @@ public class TeleOp_Final extends LinearOpMode {
 
             // Determine speed mode
             double speedScale = 0.7; // default full speed
-            if (gamepad1.left_trigger > 0.2) speedScale = 0.5;  // slow
+            if (gamepad1.left_trigger > 0.2) speedScale = 0.4;  // slow
             if (gamepad1.right_trigger > 0.2) speedScale = 1.0; // normal (override slow)
 
             double leftPower  = Range.clip((drive*speedScale) - (turn*speedScale), -1, 1);
@@ -100,14 +104,21 @@ public class TeleOp_Final extends LinearOpMode {
                 config.leftAdvancer.setPower(0);
                 config.rightAdvancer.setPower(0);
             }
+            if (gamepad2.b) {
+                config.leftAdvancer.setPower(1);
+                config.rightAdvancer.setPower(-1);
+            } else {
+                config.leftAdvancer.setPower(0);
+                config.rightAdvancer.setPower(0);
+            }
 
             // --- SHOOTER (Gamepad2) ---
             if (gamepad2.right_bumper) {
-                config.shooter.setPower(FAR_POWER);
+                config.shooter.setVelocity(Far_Velo);
             } else if (gamepad2.left_bumper) {
-                config.shooter.setPower(NEAR_POWER);
+                config.shooter.setVelocity(Near_Velo);
             } else {
-                config.shooter.setPower(0);
+                config.shooter.setVelocity(0);
             }
 
             // --- TELEMETRY ---
