@@ -66,8 +66,8 @@ public class TeleOp_Final extends LinearOpMode {
 
 
 
-        telemetry.addLine("Initialized ✅");
-        telemetry.update();
+    telemetry.addLine("Initialized ✅");
+    telemetry.update();
         waitForStart();
 
         while (opModeIsActive()) {
