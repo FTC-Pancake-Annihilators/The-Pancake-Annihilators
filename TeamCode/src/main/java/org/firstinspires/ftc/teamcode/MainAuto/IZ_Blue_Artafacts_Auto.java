@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Pedro Pathing Autonomous", group = "Autonomous")
 @Configurable // Panels telemetry
-public class IZ_Artafacts_Auto extends OpMode {
+public class IZ_Blue_Artafacts_Auto extends OpMode {
 
     private TelemetryManager panelsTelemetry;
     private Follower follower;
