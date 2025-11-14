@@ -1,6 +1,6 @@
 https://docs.google.com/document/d/e/2PACX-1vT5bRqDH3FGX3j8lieJXPhzYS_UtAjJJiCa53V_7LdP9tYU24BKN04X8eHVvUnD8QJdvn-5lokDg3R1/pub
 
-
+https://docs.google.com/presentation/d/e/2PACX-1vTX-jZ08Zxy2rkF2S6-a_e4bK8yvkKsb9QBQ-1qs7znVuk5GsRL2nBY7hdMcVxjWKKS_HbZdLAKP6lz/pub?start=false&loop=false&delayms=3000
 ## NOTICE
 
 This repository contains the public FTC SDK for the DECODE (2025-2026) competition season.
