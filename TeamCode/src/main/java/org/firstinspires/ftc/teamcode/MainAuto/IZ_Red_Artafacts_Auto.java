@@ -10,125 +10,241 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.Mecanum_Config;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Pedro Pathing Red Goal Auto", group = "Autonomous")
 @Configurable
 public class IZ_Red_Artafacts_Auto extends OpMode {
+    private enum LaunchState { IDLE, PREPARE, LAUNCH }
+    private LaunchState launchState = LaunchState.IDLE;
+    private ElapsedTime shotTimer = new ElapsedTime();
+    private ElapsedTime feederTimer = new ElapsedTime();
 
+    private static final double LAUNCHER_TARGET_VELOCITY = 1750;
+    private static final double LAUNCHER_MIN_VELOCITY = 1749;
+    private static final double FEED_TIME = 0.2;
+    private static final double TIME_BETWEEN_SHOTS = 2;
+
+    private boolean shooting = false; // tracks when we are shooting
+    private int shotsToFire = 3; // tracks shots per shooting segment
     private TelemetryManager panelsTelemetry;
     public Follower follower;
     private int pathState;
     private Paths paths;
+    private Mecanum_Config mecanum;
 
     @Override
     public void init() {
+        mecanum = new Mecanum_Config(hardwareMap);
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(72, 8, Math.toRadians(90)));
 
-        paths = new Paths(follower); // Build red-side paths
+        paths = new Paths(follower);
 
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
+        mecanum.shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
     }
 
     @Override
     public void loop() {
-        follower.update(); // Update Pedro Pathing
-        pathState = autonomousPathUpdate(); // Run state machine
+        follower.update();
+        pathState = autonomousPathUpdate();
 
+        // Telemetry
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
-        panelsTelemetry.debug("Heading", follower.getPose().getHeading());
+        panelsTelemetry.debug("Heading", Math.toDegrees(follower.getPose().getHeading()));
+        panelsTelemetry.debug("Shooting", shooting);
+        panelsTelemetry.debug("LaunchState", launchState);
+        panelsTelemetry.debug("Shots Left", shotsToFire);
         panelsTelemetry.update(telemetry);
     }
 
     public int autonomousPathUpdate() {
         switch (pathState) {
-            case 0:
+
+            case 0: // Go to first goal
                 follower.followPath(paths.gotogoalshootdefault);
                 pathState++;
                 break;
 
-            case 1:
+            case 1: // Shooting first set
+                if (!shooting) {
+                    shooting = true;
+                    shotsToFire = 3;
+                }
+                if (shooting) {
+                    if (launch(true)) {
+                        shotsToFire--;
+                        if (shotsToFire <= 0) {
+                            shooting = false;
+                            pathState++;
+                        }
+                    }
+                }
+                break;
+
+            case 2:
                 if (!follower.isBusy()) {
                     follower.followPath(paths.GotoSet1);
                     pathState++;
                 }
                 break;
 
-            case 2:
+            case 3: // Intake first artifacts
+                mecanum.IntakeMotor.setPower(1);
                 if (!follower.isBusy()) {
                     follower.followPath(paths.Intakeset1);
                     pathState++;
                 }
                 break;
 
-            case 3:
+            case 4: // Move to shooting position set 1
                 if (!follower.isBusy()) {
                     follower.followPath(paths.Gotoshootset1);
+                    shooting = true;
+                    shotsToFire = 3;
                     pathState++;
                 }
                 break;
 
-            case 4:
+            case 5: // Shooting set 1
+                if (shooting) {
+                    if (launch(true)) {
+                        shotsToFire--;
+                        if (shotsToFire <= 0) {
+                            shooting = false;
+                            pathState++;
+                        }
+                    }
+                }
+                break;
+
+            case 6: // Go to set 2
                 if (!follower.isBusy()) {
                     follower.followPath(paths.GotoSet2);
                     pathState++;
                 }
                 break;
 
-            case 5:
+            case 7: // Intake set 2
+                mecanum.IntakeMotor.setPower(1);
                 if (!follower.isBusy()) {
                     follower.followPath(paths.Intakeset2);
                     pathState++;
                 }
                 break;
 
-            case 6:
+            case 8: // Move to shooting position set 2
                 if (!follower.isBusy()) {
                     follower.followPath(paths.Gotoshootset2);
+                    shooting = true;
+                    shotsToFire = 3;
                     pathState++;
                 }
                 break;
 
-            case 7:
+            case 9: // Shooting set 2
+                if (shooting) {
+                    if (launch(true)) {
+                        shotsToFire--;
+                        if (shotsToFire <= 0) {
+                            shooting = false;
+                            pathState++;
+                        }
+                    }
+                }
+                break;
+
+            case 10: // Go to set 3
                 if (!follower.isBusy()) {
                     follower.followPath(paths.GotoSet3);
                     pathState++;
                 }
                 break;
 
-            case 8:
+            case 11: // Intake set 3
+                mecanum.IntakeMotor.setPower(1);
                 if (!follower.isBusy()) {
                     follower.followPath(paths.Intakeset3);
                     pathState++;
                 }
                 break;
 
-            case 9:
+            case 12: // Move to shooting position set 3
                 if (!follower.isBusy()) {
                     follower.followPath(paths.Gotoshootset3);
+                    shooting = true;
+                    shotsToFire = 3;
                     pathState++;
                 }
                 break;
 
-            case 10:
+            case 13: // Shooting set 3
+                if (shooting) {
+                    if (launch(true)) {
+                        shotsToFire--;
+                        if (shotsToFire <= 0) {
+                            shooting = false;
+                            pathState++;
+                        }
+                    }
+                }
+                break;
+
+            case 14: // Move to ranking point
                 if (!follower.isBusy()) {
                     follower.followPath(paths.GetRankingPoint);
                     pathState++;
                 }
                 break;
 
-            case 11:
-                // All paths complete
+            case 15:
+                // All paths finished
                 break;
         }
+
         return pathState;
     }
-
+    boolean launch(boolean shotRequested) {
+        switch (launchState) {
+            case IDLE:
+                if (shotRequested) {
+                    launchState = LaunchState.PREPARE;
+                    shotTimer.reset();
+                }
+                break;
+            case PREPARE:
+                mecanum.shooter.setVelocity(LAUNCHER_TARGET_VELOCITY);
+                if (mecanum.shooter.getVelocity() > LAUNCHER_MIN_VELOCITY) {
+                    launchState = LaunchState.LAUNCH;
+                    mecanum.leftAdvancer.setPower(1);
+                    mecanum.rightAdvancer.setPower(1);
+                    feederTimer.reset();
+                }
+                break;
+            case LAUNCH:
+                if (feederTimer.seconds() > FEED_TIME) {
+                    mecanum.leftAdvancer.setPower(0);
+                    mecanum.rightAdvancer.setPower(0);
+                    if (shotTimer.seconds() > TIME_BETWEEN_SHOTS) {
+                        launchState = LaunchState.IDLE;
+                        return true;
+                    }
+                }
+                break;
+        }
+        return false;
+    }
     public static class Paths {
 
         public PathChain gotogoalshootdefault;
