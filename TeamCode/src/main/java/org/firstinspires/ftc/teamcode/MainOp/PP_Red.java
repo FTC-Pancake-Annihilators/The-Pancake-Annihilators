@@ -10,6 +10,7 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
@@ -50,7 +51,7 @@ public class PP_Red extends OpMode {
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(96.48, 95.6))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
                 .build();
-        Mecanum_Config.shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
+       // Mecanum_Config.shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
     }
     @Override
     public void start() {
@@ -193,7 +194,7 @@ public class PP_Red extends OpMode {
             Mecanum_Config.shooter.setVelocity(0);
 
         }
-        telemetry.addData("Shooter Velocity", Mecanum_Config.shooter.getVelocity());
+
 
         shooterStatus  = gamepad2.right_bumper ? "FORWARD" : gamepad2.left_bumper ? "REVERSE" : "OFF";
         intakeStatus   = gamepad2.a ? "IN" : gamepad2.y ? "OUT" : "OFF";

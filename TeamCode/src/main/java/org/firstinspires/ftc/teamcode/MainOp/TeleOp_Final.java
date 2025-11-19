@@ -45,7 +45,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Config;
 
-@TeleOp(name="TeleOp_Final_NoRumble", group="TELEOP")
+@TeleOp(name="TeleOp_Final", group="TELEOP")
 public class TeleOp_Final extends OpMode {
     private Config config;
 
@@ -109,7 +109,7 @@ public class TeleOp_Final extends OpMode {
             // --- ADVANCERS (Gamepad2) ---
             if (gamepad2.x) {
                 config.leftAdvancer.setPower(-1);
-                config.rightAdvancer.setPower(1);
+                config.rightAdvancer.setPower(-1);
             } else {
                 config.leftAdvancer.setPower(0);
                 config.rightAdvancer.setPower(0);

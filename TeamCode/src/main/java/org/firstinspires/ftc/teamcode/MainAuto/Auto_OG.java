@@ -15,7 +15,6 @@ import org.firstinspires.ftc.teamcode.Mecanum_Config;
 
 @Autonomous(name="StarterBotAuto_Fixed", group="StarterBot")
 public class Auto_OG extends OpMode {
-
     final double FEED_TIME = 0.20;
     final double LAUNCHER_TARGET_VELOCITY = 1750;
     final double LAUNCHER_MIN_VELOCITY = 1750;

@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "12 arfts auto")
 @Configurable
-public class IZ_Blue_Artafacts_Auto extends OpMode {
+public class      IZ_Blue_Artafacts_Auto extends OpMode {
 
     private TelemetryManager panelsTelemetry;
     private Mecanum_Config mecanum;
