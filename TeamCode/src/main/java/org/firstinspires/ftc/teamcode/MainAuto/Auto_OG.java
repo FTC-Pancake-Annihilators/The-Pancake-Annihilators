@@ -34,7 +34,7 @@ public class Auto_OG extends OpMode {
     private ElapsedTime feederTimer = new ElapsedTime();
     private ElapsedTime driveTimer = new ElapsedTime();
 
-    private Mecanum_Config mecanum;
+
 
     private enum LaunchState { IDLE, PREPARE, LAUNCH }
     private LaunchState launchState;
@@ -52,10 +52,11 @@ public class Auto_OG extends OpMode {
 
     private enum Alliance { RED, BLUE }
     private Alliance alliance = Alliance.RED;
+    private Mecanum_Config mecanum;
 
     @Override
     public void init() {
-        mecanum = new Mecanum_Config(hardwareMap);
+       mecanum = new Mecanum_Config(hardwareMap);
 
         autonomousState = AutonomousState.BACK_UP_BEFORE_SHOOT;
         launchState = LaunchState.IDLE;
@@ -84,7 +85,6 @@ public class Auto_OG extends OpMode {
 
         mecanum.shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
         mecanum.leftAdvancer.setDirection(DcMotorSimple.Direction.REVERSE);
-
         telemetry.addData("Status", "Initialized");
     }
 

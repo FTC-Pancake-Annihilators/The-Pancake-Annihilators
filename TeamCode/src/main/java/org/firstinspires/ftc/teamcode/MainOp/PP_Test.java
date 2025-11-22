@@ -14,26 +14,16 @@
 
     
         // Toggle states
-        private boolean intakeOnfwd = false;
-        private boolean intakeOnbwd = false;
-        private boolean advancersOnfwd = false;
-        private boolean advancersOnbwd = false;
-        private boolean shooterOnfwd = false;
-        private boolean shooterOnbwd = false;
+
     
-        private String shooterStatus = "OFF";
-        private String intakeStatus = "OFF";
-        private String advancerStatus = "OFF";
+
     
-        // Shooter Velo
-        private final double shooter_Velo = 1750;
-    
-        private Mecanum_Config Mecanum_Config;
+        private Mecanum_Config mecanum;
     
     
         @Override
         public void init() {
-            Mecanum_Config = new Mecanum_Config(hardwareMap);
+            mecanum = new Mecanum_Config(hardwareMap);
 
 
             // If you want to set shooter PIDF here, do it in your Mecanum_Config initialization.
@@ -58,74 +48,74 @@
             // ---------- Input toggles (edge triggered) ----------
             // Intake forward toggle (A)
             if (gamepad2.aWasPressed()) {
-                intakeOnfwd = !intakeOnfwd;
-                if (intakeOnfwd) intakeOnbwd = false; // mutually exclusive
+                mecanum.intakeOnfwd = !mecanum.intakeOnfwd;
+                if (mecanum.intakeOnfwd) mecanum.intakeOnbwd = false; // mutually exclusive
             }
     
             // Intake backward toggle (Y)
             if (gamepad2.yWasPressed()) {
-                intakeOnbwd = !intakeOnbwd;
-                if (intakeOnbwd) intakeOnfwd = false; // mutually exclusive
+                mecanum.intakeOnbwd = !mecanum.intakeOnbwd;
+                if (mecanum.intakeOnbwd) mecanum.intakeOnfwd = false; // mutually exclusive
             }
     
             // Advancers forward toggle (X)
             if (gamepad2.xWasPressed()) {
-                advancersOnfwd = !advancersOnfwd;
-                if (advancersOnfwd) advancersOnbwd = false; // mutually exclusive
+                mecanum.advancersOnfwd = !mecanum.advancersOnfwd;
+                if (mecanum.advancersOnfwd) mecanum.advancersOnbwd = false; // mutually exclusive
             }
     
             // Advancers backward toggle (B)
             if (gamepad2.bWasPressed()) {
-                advancersOnbwd = !advancersOnbwd;
-                if (advancersOnbwd) advancersOnfwd = false; // mutually exclusive
+                mecanum.advancersOnbwd = !mecanum.advancersOnbwd;
+                if (mecanum.advancersOnbwd) mecanum.advancersOnfwd = false; // mutually exclusive
             }
     
             // Shooter forward toggle (right bumper)
             if (gamepad2.rightBumperWasPressed()) {
-                shooterOnfwd = !shooterOnfwd;
-                if (shooterOnfwd) shooterOnbwd = false; // mutually exclusive
+                mecanum.shooterOnfwd = !mecanum.shooterOnfwd;
+                if (mecanum.shooterOnfwd) mecanum.shooterOnbwd = false; // mutually exclusive
             }
     
             // Shooter reverse toggle (left bumper)
             if (gamepad2.leftBumperWasPressed()) {
-                shooterOnbwd = !shooterOnbwd;
-                if (shooterOnbwd) shooterOnfwd = false; // mutually exclusive
+                mecanum.shooterOnbwd = !mecanum.shooterOnbwd;
+                if (mecanum.shooterOnbwd) mecanum.shooterOnfwd = false; // mutually exclusive
             }
     
             // ---------- Apply motor outputs (set each motor once) ----------
             // Intake motor
             double intakePower = 0.0;
-            if (intakeOnfwd) intakePower = 1.0;
-            else if (intakeOnbwd) intakePower = -1.0;
-            Mecanum_Config.IntakeMotor.setPower(intakePower);
+            if (mecanum.intakeOnfwd) intakePower = 1.0;
+            else if (mecanum.intakeOnbwd) intakePower = -1.0;
+            mecanum.IntakeMotor.setPower(intakePower);
     
             // Advancers / feeders
             double leftAdvPower = 0.0;
             double rightAdvPower = 0.0;
-            if (advancersOnfwd) {
+            if (mecanum.advancersOnfwd) {
                 leftAdvPower = -1.0;
                 rightAdvPower = 1.0;
-            } else if (advancersOnbwd) {
+            } else if (mecanum.advancersOnbwd) {
                 leftAdvPower = 1.0;
                 rightAdvPower = -1.0;
             }
-            Mecanum_Config.leftAdvancer.setPower(leftAdvPower);
-            Mecanum_Config.rightAdvancer.setPower(rightAdvPower);
+            mecanum.leftAdvancer.setPower(leftAdvPower);
+            mecanum.rightAdvancer.setPower(rightAdvPower);
     
             // Shooter (use velocity setting once)
             double shooterVelocity = 0.0;
-            if (shooterOnfwd) shooterVelocity = shooter_Velo;
-            else if (shooterOnbwd) shooterVelocity = -shooter_Velo;
+            if (mecanum.shooterOnfwd) shooterVelocity = mecanum.shooter_Velo;
+            else if (mecanum.shooterOnbwd) shooterVelocity = -mecanum.shooter_Velo;
             // Assuming Mecanum_Config.shooter is a DcMotorEx with setVelocity method
-            Mecanum_Config.shooter.setVelocity(shooterVelocity);
+            mecanum.shooter.setVelocity(shooterVelocity);
     
             // ---------- Status strings (reflect toggles, not instantaneous buttons) ----------
-            shooterStatus = shooterOnfwd ? "FORWARD" : shooterOnbwd ? "REVERSE" : "OFF";
-            intakeStatus = intakeOnfwd ? "IN" : intakeOnbwd ? "OUT" : "OFF";
-            advancerStatus = advancersOnfwd ? "IN" : advancersOnbwd ? "OUT" : "OFF";
+            mecanum.shooterStatus = mecanum.shooterOnfwd ? "FORWARD" : mecanum.shooterOnbwd ? "REVERSE" : "OFF";
+            mecanum.intakeStatus = mecanum.intakeOnfwd ? "IN" : mecanum.intakeOnbwd ? "OUT" : "OFF";
+            mecanum.advancerStatus = mecanum.advancersOnfwd ? "IN" : mecanum.advancersOnbwd ? "OUT" : "OFF";
     
             telemetry.addData("Status", "Shooter: %s | Intake: %s | Advancers: %s",
-                    shooterStatus, intakeStatus, advancerStatus);
+                    mecanum.shooterStatus, mecanum.intakeStatus, mecanum.advancerStatus);
             telemetry.update();
     
             // ---------- Automated PathFollowing ----------

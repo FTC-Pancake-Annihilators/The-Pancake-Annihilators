@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -7,6 +8,7 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 public class Mecanum_Config {
@@ -14,12 +16,27 @@ public class Mecanum_Config {
     public DcMotorEx lb_Drive;
     public DcMotorEx rf_Drive;
     public DcMotorEx rb_Drive;
+    public IMU imu;
     public DcMotor IntakeMotor;
 
     public DcMotorEx shooter;
     public CRServo leftAdvancer;
     public CRServo rightAdvancer;
     public double shooter_Velo = 1750;
+
+    public boolean intakeOnfwd = false;
+    public boolean intakeOnbwd = false;
+    public boolean advancersOnfwd = false;
+    public boolean advancersOnbwd = false;
+    public boolean shooterOnfwd = false;
+    public boolean shooterOnbwd = false;
+
+    public String shooterStatus = "OFF";
+    public String intakeStatus = "OFF";
+    public String advancerStatus = "OFF";
+
+    // Shooter Velo
+
 
 
     public static Pose startingPose;
@@ -32,6 +49,11 @@ public class Mecanum_Config {
         shooter = mecanum.get(DcMotorEx.class, "shooter");
         leftAdvancer = mecanum.get(CRServo.class, "leftAdvancer");
         rightAdvancer = mecanum.get(CRServo.class, "rightAdvancer");
+        imu = mecanum.get(IMU.class, "imu");
+        RevHubOrientationOnRobot revOrientation = new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.DOWN);
+        imu.initialize((new IMU.Parameters(revOrientation)));
         lf_Drive.setDirection(DcMotorEx.Direction.REVERSE);
         lb_Drive.setDirection(DcMotorEx.Direction.REVERSE);
         rf_Drive.setDirection(DcMotorEx.Direction.FORWARD);
@@ -47,6 +69,8 @@ public class Mecanum_Config {
         rb_Drive.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rf_Drive.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
+
+
 
 
     }
