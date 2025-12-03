@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.MainOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 import org.firstinspires.ftc.teamcode.Mechanisms.Mecanum_Drive;
-
+@TeleOp(name = "Field_relative")
 public class FieldRelative extends OpMode {
 
      Field_Orientation drive = new Field_Orientation();
@@ -24,7 +25,7 @@ public class FieldRelative extends OpMode {
         strafe = gamepad1.left_stick_x;
         turn = gamepad1.right_stick_x;
 
-        drive.driveFieldRelative(forward,strafe,turn);
+        drive.driveFieldRelative(-forward,strafe,turn);
 
 
 

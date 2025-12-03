@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 
 @Autonomous(name="RedAutoPickthis", group="StarterBot")
-public class Auto_OG extends LinearOpMode {
+public class Blue_Auto extends LinearOpMode {
     final double FEED_TIME = 0.20;
     final double LAUNCHER_TARGET_VELOCITY = 1755;
     final double LAUNCHER_MIN_VELOCITY = 1750;
@@ -65,10 +65,10 @@ public class Auto_OG extends LinearOpMode {
     public void drive(boolean turn, long millis) {
 
         if (turn) {
-            mecanum.lb_Drive.setPower(-0.5);
-            mecanum.rb_Drive.setPower(0.5);
-            mecanum.lf_Drive.setPower(-0.5);
-            mecanum.rf_Drive.setPower(0.5);
+            mecanum.lb_Drive.setPower(0.5);
+            mecanum.rb_Drive.setPower(-0.5);
+            mecanum.lf_Drive.setPower(0.5);
+            mecanum.rf_Drive.setPower(-0.5);
         } else {
             mecanum.lb_Drive.setPower(-0.5);
             mecanum.rb_Drive.setPower(-0.5);

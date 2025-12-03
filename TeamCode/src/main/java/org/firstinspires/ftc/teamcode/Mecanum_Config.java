@@ -22,7 +22,9 @@ public class Mecanum_Config {
     public DcMotorEx shooter;
     public CRServo leftAdvancer;
     public CRServo rightAdvancer;
-    public double shooter_Velo = 1750;
+    public double shooter_Velo = 1650;
+    public double minimumVelo = shooter_Velo-50;
+    public final double advancerPwr= 1.0;
 
     public boolean intakeOnfwd = false;
     public boolean intakeOnbwd = false;
@@ -52,7 +54,7 @@ public class Mecanum_Config {
         imu = mecanum.get(IMU.class, "imu");
         RevHubOrientationOnRobot revOrientation = new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                RevHubOrientationOnRobot.UsbFacingDirection.DOWN);
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD);
         imu.initialize((new IMU.Parameters(revOrientation)));
         lf_Drive.setDirection(DcMotorEx.Direction.REVERSE);
         lb_Drive.setDirection(DcMotorEx.Direction.REVERSE);
