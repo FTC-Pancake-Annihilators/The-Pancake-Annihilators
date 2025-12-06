@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 import org.firstinspires.ftc.teamcode.R;
 
-@TeleOp(name = "Mecanum_JeffryDrive")
+@TeleOp(name = "AAAABot_2")
 public class Bot_2 extends OpMode {
     public DcMotorEx lf_Drive;
     public DcMotorEx lb_Drive;
@@ -34,7 +34,7 @@ public class Bot_2 extends OpMode {
     private String advancerStatus = "OFF";
 
     // Shooter Velo
-    private final double shooter_Velo = 1650; // 1750 -> 1650
+    private final double shooter_Velo = 10000; // 1750 -> 1850
 
 
 
@@ -82,7 +82,7 @@ public class Bot_2 extends OpMode {
 
     @Override
     public void loop() {
-        mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+        mecanumDrive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
 
         // Advancers forward toggle (X)
@@ -97,6 +97,9 @@ public class Bot_2 extends OpMode {
             if (advancersOnbwd) advancersOnfwd = false; // mutually exclusive
         }
 
+
+
+//
         // Shooter forward toggle (right bumper)
         if (gamepad2.rightBumperWasPressed()) {
             shooterOnfwd = !shooterOnfwd;

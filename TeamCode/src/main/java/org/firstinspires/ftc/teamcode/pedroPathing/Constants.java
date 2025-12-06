@@ -81,7 +81,7 @@ public class Constants {
             .rightFrontMotorName("rf_Drive")
             .rightRearMotorName("rb_Drive")
             .leftRearMotorName("lb_Drive")
-            .leftFrontMotorName("lf_D rive")
+            .leftFrontMotorName("lf_Drive")
             .leftFrontEncoderDirection(Encoder.FORWARD)
             .leftRearEncoderDirection(Encoder.FORWARD)
             .rightFrontEncoderDirection(Encoder.FORWARD)

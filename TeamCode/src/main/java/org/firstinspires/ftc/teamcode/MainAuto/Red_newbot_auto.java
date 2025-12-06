@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.MainAuto;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -26,7 +27,7 @@ import java.util.List;
 public class Red_newbot_auto extends LinearOpMode {
 
     private DcMotorEx shooter;
-    private Servo leftServo, rightServo;
+    private CRServo leftServo, rightServo;
     private Follower follower;
     private PathChain path1, path2; // ✅ fixed
 
@@ -38,8 +39,6 @@ public class Red_newbot_auto extends LinearOpMode {
     private double multiplier = 900.0;
     private final double rpmTolerance = 5.0;
 
-    private final double leftHome = 0.0;
-    private final double rightHome = 1.0;
     private final double servoTap = 0.03;
     private final int tapHoldMs = 120;
     private final int betweenShotsMs = 220;
@@ -53,10 +52,10 @@ public class Red_newbot_auto extends LinearOpMode {
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        leftServo = hardwareMap.get(Servo.class, "leftservo");
-        rightServo = hardwareMap.get(Servo.class, "rightservo");
-        leftServo.setPosition(leftHome);
-        rightServo.setPosition(rightHome);
+        leftServo = hardwareMap.get(CRServo.class, "leftAdvancer");
+        rightServo = hardwareMap.get(CRServo.class, "rightAdvancer");
+        leftServo.setPower(0);
+        rightServo.setPower(0);
 
         follower = Constants.createFollower(hardwareMap);
 
@@ -115,12 +114,12 @@ public class Red_newbot_auto extends LinearOpMode {
                 sleep(20);
             }
 
-            leftServo.setPosition(clamp(leftHome + servoTap,0,1));
-            rightServo.setPosition(clamp(rightHome - servoTap,0,1));
+            leftServo.setPower(-1);
+            rightServo.setPower(1);
             sleep(tapHoldMs);
 
-            leftServo.setPosition(leftHome);
-            rightServo.setPosition(rightHome);
+            leftServo.setPower(0);
+            rightServo.setPower(0);
 
             sleep(betweenShotsMs);
         }
