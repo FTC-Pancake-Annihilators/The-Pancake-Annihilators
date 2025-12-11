@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.teamcode.Config;
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 import org.firstinspires.ftc.teamcode.R;
 
@@ -18,6 +19,7 @@ public class Bot_2 extends OpMode {
     public DcMotorEx rf_Drive;
     public DcMotorEx rb_Drive;
 
+    private Config config;
 
     public DcMotorEx shooter;
     public CRServo leftAdvancer;
