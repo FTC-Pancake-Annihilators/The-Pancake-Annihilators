@@ -1,22 +1,54 @@
 package org.firstinspires.ftc.teamcode.MainOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Mechanisms.Webcam_Localization;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-public class webCamOp extends OpMode {
+import java.util.List;
 
-    Webcam_Localization aprilTagLocalization = new Webcam_Localization();
 
-    @Override
-    public void init() {
-    aprilTagLocalization.initWebcamLocalization(hardwareMap, telemetry);
+public class webCamOp {
+
+    private AprilTagProcessor processer;
+
+    private VisionPortal visionportal;
+
+    private List<AprilTagDetection> detections;
+    private AprilTagDetection[] detectionMap;
+
+    public webCamOp(HardwareMap hardwareMap) {
+        processer = new AprilTagProcessor.Builder().build();
+
+        visionportal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .addProcessor(processer)
+                .build();
+
     }
 
-    @Override
-    public void loop() {
-    //Update the vision portal
-    aprilTagLocalization.update();
 
+    public void update() {
+        detections = processer.getDetections();
+        detectionMap = new AprilTagDetection[5];
+        for (AprilTagDetection detection : detections) {
+            detectionMap[detection.id - 20] = detection;
+        }
+    }
+
+    public boolean seesTag(int id) {
+        return detectionMap[id-20] != null;
+    }
+
+    public AprilTagDetection getTag(int id) {
+        return detectionMap[id-20];
+    }
+
+    public List<AprilTagDetection> getAllDetections() {
+        return detections;
     }
 }
