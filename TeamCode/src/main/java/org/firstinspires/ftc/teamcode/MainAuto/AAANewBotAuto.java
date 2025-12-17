@@ -14,8 +14,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 
-@Autonomous(name="RedAutoPickthis", group="StarterBot")
-public class Blue_Auto extends LinearOpMode {
+@Autonomous(name="AAANewREd", group="StarterBot")
+public class AAANewBotAuto extends LinearOpMode {
     final double FEED_TIME = 0.20;
     final double LAUNCHER_TARGET_VELOCITY = 1755;
     final double LAUNCHER_MIN_VELOCITY = 1750;
@@ -45,8 +45,8 @@ public class Blue_Auto extends LinearOpMode {
         sleep(1000);
         fire();
         mecanum.shooter.setVelocity(0);
-        drive(true, 500);
-        drive(false, 1000);
+        drive(false, 500);
+
     }
 
     public void fire() {
@@ -55,7 +55,7 @@ public class Blue_Auto extends LinearOpMode {
         mecanum.leftAdvancer.setPower(mecanum.advancerPwr);
         mecanum.rightAdvancer.setPower(-mecanum.advancerPwr);
         mecanum.IntakeMotor.setPower(-1);
-        sleep(5000);
+        sleep(100);
         mecanum.shooter.setPower(0);
         mecanum.rightAdvancer.setPower(0);
         mecanum.leftAdvancer.setPower(0);
@@ -63,23 +63,18 @@ public class Blue_Auto extends LinearOpMode {
 
     }
     public void drive(boolean turn, long millis) {
-            if (turn){
-                mecanum.lb_Drive.setPower(-0.5);
-                mecanum.rb_Drive.setPower(-0.5);
-                mecanum.lf_Drive.setPower(0.5);
-                mecanum.rf_Drive.setPower(0.5);
-            }
-//        if (turn) {
-//            mecanum.lb_Drive.setPower(0.5);
-//            mecanum.rb_Drive.setPower(-0.5);
-//            mecanum.lf_Drive.setPower(0.5);
-//            mecanum.rf_Drive.setPower(-0.5);
-//        } else {
-//            mecanum.lb_Drive.setPower(-0.5);
-//            mecanum.rb_Drive.setPower(-0.5);
-//            mecanum.lf_Drive.setPower(-0.5);
-//            mecanum.rf_Drive.setPower(-0.5);
-//        }
+
+        if (turn) {
+            mecanum.lb_Drive.setPower(0.5);
+            mecanum.rb_Drive.setPower(0.5);
+            mecanum.lf_Drive.setPower(-0.5);
+            mecanum.rf_Drive.setPower(-0.5);
+        } else {
+            mecanum.lb_Drive.setPower(-0.5);
+            mecanum.rb_Drive.setPower(-0.5);
+            mecanum.lf_Drive.setPower(0.5);
+            mecanum.rf_Drive.setPower(0.5);
+        }
 
         sleep(millis);
         mecanum.lb_Drive.setPower(0);

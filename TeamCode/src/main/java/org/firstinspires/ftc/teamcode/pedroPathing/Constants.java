@@ -15,52 +15,24 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(6)
-            .forwardZeroPowerAcceleration(-25.9346931313679598)
-            .lateralZeroPowerAcceleration(-67.342491844080064)
-            .translationalPIDFCoefficients(new PIDFCoefficients(
-                    0,
-                    0,
-                    0,
-                    0
-            ))
-            .translationalPIDFSwitch(4)
-            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(
-                    0,
-                    0,
-                    0,
-                    0
-            ))
+            .mass(11.0)
+            .forwardZeroPowerAcceleration(-34.0)
+            .lateralZeroPowerAcceleration(-59.0)
 
-            .headingPIDFCoefficients(new PIDFCoefficients(
-                    0,
-                    0,
-                    0,
-                    0
-            ))
-            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(
-                    2,
-                    0,
-                    0,
-                    0
-            ))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-            ))
-            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-            ))
-            .drivePIDFSwitch(15)
-            .centripetalScaling(0.0005);
-    
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.30, 0.00001, 0.04, 0.020))
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.22, 0.0001, 0.02, 0.018))
+            .useSecondaryTranslationalPIDF(true)
+
+            .headingPIDFCoefficients(new PIDFCoefficients(1.2, 0.001, 0.1, 0.025))
+            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(1.5, 0.005, 0.03, 0.03))
+            .useSecondaryHeadingPIDF(true)
+
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.03, 0.00001, 0.007, 0.6, 0.02))
+            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.002, 0.00001, 0.0001, 0.6, 0.05))
+            .useSecondaryDrivePIDF(true)
+
+
+            .automaticHoldEnd(true);
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
@@ -72,8 +44,9 @@ public class Constants {
             .leftRearMotorDirection(DcMotorEx.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorEx.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorEx.Direction.FORWARD)
-            .xVelocity(78.261926752421046666666666666667)
-            .yVelocity(61.494551922189565);
+            .xVelocity(67.0)
+            .yVelocity(56)
+            .useBrakeModeInTeleOp(false);
 
 
 
@@ -92,14 +65,14 @@ public class Constants {
 
     public static PathConstraints pathConstraints = new PathConstraints(
             0.995,
-            0.1,
-            0.1,
-            0.009,
+            0.01,
+            0.01,
+            0.001,
             50,
-            1.25,
+            1.8,
             10,
-            1
-    );
+            0.9);
+
 
 
     public static Follower createFollower(HardwareMap hardwareMap) {

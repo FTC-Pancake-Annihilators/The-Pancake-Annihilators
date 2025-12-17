@@ -36,7 +36,7 @@ public class Bot_2 extends OpMode {
     private String advancerStatus = "OFF";
 
     // Shooter Velo
-    private final double shooter_Velo = 10000; // 1750 -> 1850
+    private final double shooter_Velo = 20000; // 1750 -> 1850 -> 13000 -> 20000
 
 
 
@@ -84,7 +84,7 @@ public class Bot_2 extends OpMode {
 
     @Override
     public void loop() {
-        mecanumDrive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+        mecanumDrive(gamepad1.left_stick_y, -gamepad1.left_stick_x, gamepad1.right_stick_x);
 
 
         // Advancers forward toggle (X)

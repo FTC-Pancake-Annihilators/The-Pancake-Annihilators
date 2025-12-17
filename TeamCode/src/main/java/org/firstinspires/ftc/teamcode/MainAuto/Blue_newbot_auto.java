@@ -53,8 +53,8 @@ public class Blue_newbot_auto extends LinearOpMode {
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        leftServo = hardwareMap.get(Servo.class, "leftservo");
-        rightServo = hardwareMap.get(Servo.class, "rightservo");
+        leftServo = hardwareMap.get(Servo.class, "leftAdvancer");
+        rightServo = hardwareMap.get(Servo.class, "rightAdvancer");
         leftServo.setPosition(leftHome);
         rightServo.setPosition(rightHome);
 
