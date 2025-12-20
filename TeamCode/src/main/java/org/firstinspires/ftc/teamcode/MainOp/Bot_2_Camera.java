@@ -5,16 +5,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Config;
-import org.firstinspires.ftc.teamcode.Mecanum_Config;
-import org.firstinspires.ftc.teamcode.R;
+import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 
-@TeleOp(name = "AAAABot_2")
-public class Bot_2 extends OpMode {
+@TeleOp(name = "AAAABot_2_Cam")
+public class Bot_2_Camera extends OpMode {
     public DcMotorEx lf_Drive;
     public DcMotorEx lb_Drive;
     public DcMotorEx rf_Drive;
@@ -37,11 +35,13 @@ public class Bot_2 extends OpMode {
     private String advancerStatus = "OFF";
 
     // Shooter Velo
-    private final double shooter_Velo = 2780; // 1750 -> 1850 -> 13000 -> 20000 ->
+    // Distance and velocity ranges
+    double minDis = 53;        // minimum distance (mm)
+    double maxDis = 121;// maximum distance (mm)
+    double minVelo = 2400;     // min shooter velocity
+    double maxVelo = 2780;    // max shooter velocity
 
-
-
-
+    private webCamOp camera;
 
     @Override
     public void init() {
@@ -69,7 +69,7 @@ public class Bot_2 extends OpMode {
         rf_Drive.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
 
-
+        camera = new webCamOp(hardwareMap);
 
         lf_Drive.setDirection(DcMotor.Direction.REVERSE);
         rf_Drive.setDirection(DcMotor.Direction.FORWARD);
@@ -85,6 +85,7 @@ public class Bot_2 extends OpMode {
 
     @Override
     public void loop() {
+        camera.update();
         mecanumDrive(gamepad1.left_stick_y, -gamepad1.left_stick_x, gamepad1.right_stick_x);
 
 
@@ -133,10 +134,42 @@ public class Bot_2 extends OpMode {
         rightAdvancer.setPower(rightAdvPower);
 
         // Shooter (use velocity setting once)
-        double shooterVelocity = 0.0;
-        if (shooterOnfwd) shooterVelocity = shooter_Velo;
-        else if (shooterOnbwd) shooterVelocity = -shooter_Velo;
+        double shooterVelocity = maxVelo;
+        if (camera.seesTag(20)) {
+            AprilTagPoseFtc pose = camera.getTag(20).ftcPose;
+            double distance = pose.range;
+            telemetry.addData("Distance", Double.isNaN(distance) ? "No Tag" : distance);
+            if (distance >= minDis) {
+                // Compute target velocity based on linear scaling
+                double targetVelo = ((distance - minDis) / (maxDis - minDis)) *
+                        (maxVelo - minVelo) + minVelo;
+
+                // Clamp velocity
+                targetVelo = Math.min(Math.max(targetVelo, minVelo), maxVelo);
+
+                // Set shooter velocity
+                shooterVelocity = targetVelo;
+            }
+        } else if (camera.seesTag(24)) {
+            AprilTagPoseFtc pose = camera.getTag(24).ftcPose;
+            double distance = pose.range;
+            telemetry.addData("Distance", Double.isNaN(distance) ? "No Tag" : distance);
+            if (distance >= minDis) {
+                // Compute target velocity based on linear scaling
+                double targetVelo = ((distance - minDis) / (maxDis - minDis)) *
+                        (maxVelo - minVelo) + minVelo;
+
+                // Clamp velocity
+                targetVelo = Math.min(Math.max(targetVelo, minVelo), maxVelo);
+
+                // Set shooter velocity
+                shooterVelocity = targetVelo;
+            }
+        } else {
+            telemetry.addData("Distance", "No Tag");
+        }
         // Assuming Mecanum_Config.shooter is a DcMotorEx with setVelocity method
+
         shooter.setVelocity(shooterVelocity);
 
         // ---------- Status strings (reflect toggles, not instantaneous buttons) ----------
@@ -145,6 +178,7 @@ public class Bot_2 extends OpMode {
         advancerStatus = advancersOnfwd ? "IN" : advancersOnbwd ? "OUT" : "OFF";
         telemetry.addData("Actual DPS", shooter.getVelocity(AngleUnit.DEGREES));
         telemetry.addData("Actual TPS", shooter.getVelocity());
+
         telemetry.update();
         telemetry.addData("Status", "Shooter: %s | Intake: %s | Advancers: %s",
                 shooterStatus, intakeStatus, advancerStatus);

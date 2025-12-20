@@ -22,16 +22,16 @@ public class AAANewBotAutoother extends LinearOpMode {
 
         // Fire 3 shots
         fire();
-        sleep(700);
+        sleep(1500);
         fire();
-        sleep(700);
+        sleep(1500);
         fire();
 
         // Turn shooter off
         mecanum.shooter.setVelocity(0);
 
         // Drive backwards
-        drive(false, 500);
+        drive(true, 1500);
     }
 
     /** FIRE ONE RING **/
@@ -54,16 +54,16 @@ public class AAANewBotAutoother extends LinearOpMode {
         if (!opModeIsActive()) return;
 
         // Feed ONE ring
-        mecanum.leftAdvancer.setPower(mecanum.advancerPwr);
+        mecanum.leftAdvancer.setPower(-mecanum.advancerPwr);
         mecanum.rightAdvancer.setPower(-mecanum.advancerPwr);
-        mecanum.IntakeMotor.setPower(-1);
+        //mecanum.IntakeMotor.setPower(-1);
 
-        sleep(550);  // enough for 1 ring
+        sleep(800);  // enough for 1 ring
 
         // Stop feed motors
         mecanum.leftAdvancer.setPower(0);
         mecanum.rightAdvancer.setPower(0);
-        mecanum.IntakeMotor.setPower(0);
+        //mecanum.IntakeMotor.setPower(0);
     }
 
     /** DRIVE STRAIGHT OR TURN **/
@@ -74,15 +74,15 @@ public class AAANewBotAutoother extends LinearOpMode {
         if (turn) {
             // Rotation
             mecanum.lb_Drive.setPower(-0.5);
-            mecanum.rb_Drive.setPower(-0.5);
+            mecanum.rb_Drive.setPower(0.5);
             mecanum.lf_Drive.setPower(0.5);
-            mecanum.rf_Drive.setPower(0.5);
+            mecanum.rf_Drive.setPower(-0.5);
         } else {
             // Straight motion
-            mecanum.lb_Drive.setPower(-0.5);
-            mecanum.rb_Drive.setPower(-0.5);
-            mecanum.lf_Drive.setPower(-0.5);
-            mecanum.rf_Drive.setPower(-0.5);
+            mecanum.lb_Drive.setPower(0);
+            mecanum.rb_Drive.setPower(0);
+            mecanum.lf_Drive.setPower(0);
+            mecanum.rf_Drive.setPower(0);
         }
 
         sleep(millis);

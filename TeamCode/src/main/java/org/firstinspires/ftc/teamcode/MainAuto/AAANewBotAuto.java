@@ -1,86 +1,96 @@
 package org.firstinspires.ftc.teamcode.MainAuto;
 
-import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 
-@Autonomous(name="AAANewREd", group="StarterBot")
+@Autonomous(name="AAAARedAUTO", group="StarterBot")
 public class AAANewBotAuto extends LinearOpMode {
-    final double FEED_TIME = 0.20;
-    final double LAUNCHER_TARGET_VELOCITY = 1755;
-    final double LAUNCHER_MIN_VELOCITY = 1750;
-    final double TIME_BETWEEN_SHOTS = 2;
-
-    final double DRIVE_SPEED = 0.75;
-    final double ROTATE_SPEED = 0.3;
-    final double WHEEL_DIAMETER_MM = 104;
-    final double ENCODER_TICKS_PER_REV = 537.7;
-    final double TICKS_PER_MM = (ENCODER_TICKS_PER_REV / (WHEEL_DIAMETER_MM * Math.PI));
-    final double TRACK_WIDTH_MM = 404;
-
-    int shotsToFire = 3;
-    double robotRotationAngle = 45;
 
     Mecanum_Config mecanum;
+
     @Override
     public void runOpMode() throws InterruptedException {
-        opModeIsActive();
+
         mecanum = new Mecanum_Config(hardwareMap);
 
         waitForStart();
-        //drive(false, 1500);
+
+        if (!opModeIsActive()) return;
+
+        // Fire 3 shots
         fire();
-        sleep(1000);
+        sleep(1500);
         fire();
-        sleep(1000);
+        sleep(1500);
         fire();
+
+        // Turn shooter off
         mecanum.shooter.setVelocity(0);
-        drive(false, 500);
 
+        // Drive backwards
+        drive(true, 1500);
     }
 
+    /** FIRE ONE RING **/
     public void fire() {
+
+        if (!opModeIsActive()) return;
+
+        // Spin shooter up
         mecanum.shooter.setVelocity(mecanum.shooter_Velo);
-        while (mecanum.shooter.getVelocity() < mecanum.minimumVelo) sleep(3);
-        mecanum.leftAdvancer.setPower(mecanum.advancerPwr);
+
+        ElapsedTime timer = new ElapsedTime();
+
+        // Warm up shooter WITH SAFETY
+        while (opModeIsActive()
+                && mecanum.shooter.getVelocity() < mecanum.minimumVelo
+                && timer.seconds() < 2.5) {
+            sleep(5);
+        }
+
+        if (!opModeIsActive()) return;
+
+        // Feed ONE ring
+        mecanum.leftAdvancer.setPower(-mecanum.advancerPwr);
         mecanum.rightAdvancer.setPower(-mecanum.advancerPwr);
-        mecanum.IntakeMotor.setPower(-1);
-        sleep(100);
-        mecanum.shooter.setPower(0);
-        mecanum.rightAdvancer.setPower(0);
+        //mecanum.IntakeMotor.setPower(-1);
+
+        sleep(800);  // enough for 1 ring
+
+        // Stop feed motors
         mecanum.leftAdvancer.setPower(0);
-
-
+        mecanum.rightAdvancer.setPower(0);
+        //mecanum.IntakeMotor.setPower(0);
     }
+
+    /** DRIVE STRAIGHT OR TURN **/
     public void drive(boolean turn, long millis) {
 
+        if (!opModeIsActive()) return;
+
         if (turn) {
-            mecanum.lb_Drive.setPower(0.5);
+            // Rotation
+            mecanum.lb_Drive.setPower(-0.5);
             mecanum.rb_Drive.setPower(0.5);
-            mecanum.lf_Drive.setPower(-0.5);
+            mecanum.lf_Drive.setPower(0.5);
             mecanum.rf_Drive.setPower(-0.5);
         } else {
-            mecanum.lb_Drive.setPower(-0.5);
-            mecanum.rb_Drive.setPower(-0.5);
-            mecanum.lf_Drive.setPower(0.5);
-            mecanum.rf_Drive.setPower(0.5);
+            // Straight motion
+            mecanum.lb_Drive.setPower(0);
+            mecanum.rb_Drive.setPower(0);
+            mecanum.lf_Drive.setPower(0);
+            mecanum.rf_Drive.setPower(0);
         }
 
         sleep(millis);
+
+        // Stop motors
         mecanum.lb_Drive.setPower(0);
         mecanum.rb_Drive.setPower(0);
         mecanum.lf_Drive.setPower(0);
         mecanum.rf_Drive.setPower(0);
-
     }
 }

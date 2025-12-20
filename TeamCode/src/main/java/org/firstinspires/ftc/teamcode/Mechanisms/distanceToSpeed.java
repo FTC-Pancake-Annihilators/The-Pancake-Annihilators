@@ -3,8 +3,10 @@ package org.firstinspires.ftc.teamcode.Mechanisms;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.MainOp.webCamOp;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -17,10 +19,10 @@ public class distanceToSpeed extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // Distance and velocity ranges
-        double minDis = 20;        // minimum distance (mm)
-        double maxDis = 180;       // maximum distance (mm)
+        double minDis = 53;        // minimum distance (mm)
+        double maxDis = 121;// maximum distance (mm)
         double minVelo = 2000;     // min shooter velocity
-        double maxVelo = 10000;    // max shooter velocity
+        double maxVelo = 2780;    // max shooter velocity
 
         double distance = Double.NaN;  // Initialize distance safely
 
@@ -28,10 +30,11 @@ public class distanceToSpeed extends LinearOpMode {
         webCamOp vision = new webCamOp(hardwareMap);
 
         // Initialize shooter motor
+
         DcMotorEx shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER,
-                new PIDFCoefficients(300, 0, 0, 10));
-
+                new PIDFCoefficients(300, 0, 0, 0));
+            shooter.setDirection(DcMotorSimple.Direction.REVERSE);
         waitForStart();
 
         while (opModeIsActive()) {
@@ -69,6 +72,8 @@ public class distanceToSpeed extends LinearOpMode {
 
             // Telemetry
             telemetry.addData("Distance", Double.isNaN(distance) ? "No Tag" : distance);
+            telemetry.addData("Actual DPS", shooter.getVelocity(AngleUnit.DEGREES));
+            telemetry.addData("Actual TPS", shooter.getVelocity());
             telemetry.update();
         }
     }
