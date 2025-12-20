@@ -6,8 +6,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 
-@Autonomous(name="AAAABlueAUTO", group="StarterBot")
-public class AAANewBotAutoother extends LinearOpMode {
+
+@Autonomous(name="NearBlueAUTO")
+public class AAANewBot_NearBlue extends LinearOpMode {
 
     Mecanum_Config mecanum;
 
@@ -19,12 +20,12 @@ public class AAANewBotAutoother extends LinearOpMode {
         waitForStart();
 
         if (!opModeIsActive()) return;
-
+        drive(false, 1750);
         // Fire 3 shots
         fire();
-        sleep(1500);
+        sleep(2500);
         fire();
-        sleep(1500);
+        sleep(2500);
         fire();
 
         // Turn shooter off
@@ -40,13 +41,13 @@ public class AAANewBotAutoother extends LinearOpMode {
         if (!opModeIsActive()) return;
 
         // Spin shooter up
-        mecanum.shooter.setVelocity(mecanum.shooter_Velo);
+        mecanum.shooter.setVelocity(2450);
 
         ElapsedTime timer = new ElapsedTime();
 
         // Warm up shooter WITH SAFETY
         while (opModeIsActive()
-                && mecanum.shooter.getVelocity() < mecanum.minimumVelo
+                && mecanum.shooter.getVelocity() < 2400
                 && timer.seconds() < 2.5) {
             sleep(5);
         }
@@ -79,10 +80,10 @@ public class AAANewBotAutoother extends LinearOpMode {
             mecanum.rf_Drive.setPower(-0.5);
         } else {
             // Straight motion
-            mecanum.lb_Drive.setPower(0);
-            mecanum.rb_Drive.setPower(0);
-            mecanum.lf_Drive.setPower(0);
-            mecanum.rf_Drive.setPower(0);
+            mecanum.lb_Drive.setPower(0.5);
+            mecanum.rb_Drive.setPower(0.5);
+            mecanum.lf_Drive.setPower(0.5);
+            mecanum.rf_Drive.setPower(0.5);
         }
 
         sleep(millis);

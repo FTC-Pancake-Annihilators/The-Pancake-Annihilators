@@ -36,7 +36,10 @@ public class webCamOp {
         detections = processer.getDetections();
         detectionMap = new AprilTagDetection[5];
         for (AprilTagDetection detection : detections) {
-            detectionMap[detection.id - 20] = detection;
+            //if detection.id is a between 20 and 24 add to the map
+            if (detection.id >19 && detection.id <25){
+                detectionMap[detection.id - 20] = detection;
+            }
         }
     }
 

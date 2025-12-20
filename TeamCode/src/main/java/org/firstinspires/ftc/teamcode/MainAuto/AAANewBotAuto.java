@@ -22,16 +22,16 @@ public class AAANewBotAuto extends LinearOpMode {
 
         // Fire 3 shots
         fire();
-        sleep(1500);
+        sleep(2500);
         fire();
-        sleep(1500);
+        sleep(2500);
         fire();
 
         // Turn shooter off
         mecanum.shooter.setVelocity(0);
 
         // Drive backwards
-        drive(true, 1500);
+        drive(true, 3000);
     }
 
     /** FIRE ONE RING **/
@@ -73,10 +73,10 @@ public class AAANewBotAuto extends LinearOpMode {
 
         if (turn) {
             // Rotation
-            mecanum.lb_Drive.setPower(-0.5);
-            mecanum.rb_Drive.setPower(0.5);
-            mecanum.lf_Drive.setPower(0.5);
-            mecanum.rf_Drive.setPower(-0.5);
+            mecanum.lb_Drive.setPower(0.5);
+            mecanum.rb_Drive.setPower(-0.5);
+            mecanum.lf_Drive.setPower(-0.5);
+            mecanum.rf_Drive.setPower(0.5);
         } else {
             // Straight motion
             mecanum.lb_Drive.setPower(0);

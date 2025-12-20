@@ -22,8 +22,8 @@ public class Mecanum_Config {
     public DcMotorEx shooter;
     public CRServo leftAdvancer;
     public CRServo rightAdvancer;
-    public double shooter_Velo = 2780;
-    public double minimumVelo = shooter_Velo-50;
+    public double shooter_Velo = 3100;
+    public double minimumVelo = shooter_Velo-30;
     public final double advancerPwr= 1.0;
 
     public boolean intakeOnfwd = false;
