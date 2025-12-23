@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Config;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 
-@TeleOp(name = "AAAABot_2_Cam")
+
 public class Bot_Meet_4_cal extends OpMode {
     public DcMotorEx lf_Drive;
     public DcMotorEx lb_Drive;

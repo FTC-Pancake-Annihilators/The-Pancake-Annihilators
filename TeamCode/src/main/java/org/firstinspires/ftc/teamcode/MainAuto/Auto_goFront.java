@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-@Autonomous(name="Front_Auto", group="Auto")
+
 public class Auto_goFront extends OpMode {
 
     private DcMotorEx lf_Drive;

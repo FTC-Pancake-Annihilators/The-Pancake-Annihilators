@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Pedro Pathing Red Goal Auto", group = "Autonomous")
+
 @Configurable
 public class IZ_Red_Artafacts_Auto extends OpMode {
     private enum LaunchState { IDLE, PREPARE, LAUNCH }

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name="My Robot Autonomous - Shoot First")
+
 public class Auto extends LinearOpMode {
 
     // --- 1. HARDWARE DECLARATIONS (Same as before) ---

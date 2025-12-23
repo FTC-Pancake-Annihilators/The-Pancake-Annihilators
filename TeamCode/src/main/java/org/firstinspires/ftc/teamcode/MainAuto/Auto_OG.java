@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 
-@Autonomous(name="RedAutoPickthis", group="StarterBot")
+
 public class Auto_OG extends LinearOpMode {
     final double FEED_TIME = 0.20;
     final double LAUNCHER_TARGET_VELOCITY = 1755;

@@ -178,8 +178,6 @@ public class Bot_2_Camera extends OpMode {
         advancerStatus = advancersOnfwd ? "IN" : advancersOnbwd ? "OUT" : "OFF";
         telemetry.addData("Actual DPS", shooter.getVelocity(AngleUnit.DEGREES));
         telemetry.addData("Actual TPS", shooter.getVelocity());
-
-        telemetry.update();
         telemetry.addData("Status", "Shooter: %s | Intake: %s | Advancers: %s",
                 shooterStatus, intakeStatus, advancerStatus);
         telemetry.update();

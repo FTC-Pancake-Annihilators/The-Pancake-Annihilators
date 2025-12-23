@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "12 arfts auto")
+
 @Configurable
 public class      IZ_Blue_Artafacts_Auto extends OpMode {
 

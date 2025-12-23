@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
 
-@Autonomous(name = "BLUE_Final_Auto_With_Parking", group = "Main")
+
 public class Blue_newbot_auto extends LinearOpMode {
 
     private DcMotorEx shooter;
