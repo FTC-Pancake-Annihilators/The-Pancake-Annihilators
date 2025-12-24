@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.MainOp;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -37,11 +38,13 @@ public class Bot_2_withF extends OpMode {
     final double minDis = 53, maxDis = 121;
     final double minVelo = 2400, maxVelo = 2780;
     final double TURN_GAIN = 0.02, MAX_AUTO_TURN = 0.4;
+    private RevBlinkinLedDriver blinkIn;
 
     private webCamOp camera;
 
     @Override
     public void init() {
+        blinkIn = hardwareMap.get(RevBlinkinLedDriver.class, "LED");
         lf_Drive = hardwareMap.get(DcMotorEx.class, "lf_Drive");
         rf_Drive = hardwareMap.get(DcMotorEx.class, "rf_Drive");
         lb_Drive = hardwareMap.get(DcMotorEx.class, "lb_Drive");
