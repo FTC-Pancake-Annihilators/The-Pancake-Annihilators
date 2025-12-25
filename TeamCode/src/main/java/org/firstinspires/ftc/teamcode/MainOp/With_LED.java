@@ -74,7 +74,8 @@ public class With_LED extends OpMode {
         boolean faceReady = autoFaceActive && (getTargetTag() != null);
 
         if (shooterReady && faceReady) {
-            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.SHOT_WHITE); // Pulse logic
+            // This is the official name for the green pulsing/heartbeat effect
+            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.BEATS_PER_MINUTE_FOREST_PALETTE);
         } else if (shooterReady) {
             blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
         } else if (faceReady) {

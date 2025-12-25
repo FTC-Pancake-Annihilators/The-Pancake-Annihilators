@@ -77,17 +77,19 @@ public class With_Servo_LED extends OpMode {
     }
 
     public void updateLEDs() {
+        // Check if shooter is on and within speed range
         boolean shooterReady = shooterMoving && (Math.abs(shooter.getVelocity() - targetShooterVelocity) < 60);
+        // Check if Auto-Face is toggled and a tag is actually visible
         boolean faceReady = autoFaceActive && (getTargetTag() != null);
 
         if (shooterReady && faceReady) {
-            blinkin.setPosition(LED_GRN_PULSE); // Everything Ready
+            blinkin.setPosition(0.4745); // BEATS_PER_MINUTE_FOREST_PALETTE
         } else if (shooterReady) {
-            blinkin.setPosition(LED_GREEN);     // Shooter only
+            blinkin.setPosition(0.7745); // GREEN
         } else if (faceReady) {
-            blinkin.setPosition(LED_BLUE);      // Auto-Face only
+            blinkin.setPosition(0.8745); // BLUE
         } else {
-            blinkin.setPosition(LED_RED);       // Shooter Off/Idle
+            blinkin.setPosition(0.6145); // RED
         }
     }
 
