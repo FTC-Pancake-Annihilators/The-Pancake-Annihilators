@@ -6,149 +6,170 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@TeleOp(name = "Bot_2_Driver_Final")
+@TeleOp(name = "Master_Bot_Servo_Clean")
 public class WithF_ServoMode extends OpMode {
     // Hardware
-    public DcMotorEx lf_Drive, lb_Drive, rf_Drive, rb_Drive, shooter;
+    public DcMotorEx lf, rf, lb, rb, shooter;
     public CRServo leftAdvancer, rightAdvancer;
     public Servo blinkin;
-    public DistanceSensor distLeft, distRight;
+    public DistanceSensor distL, distR;
+    public VoltageSensor voltSensor;
 
-    // Logic States
-    private boolean shooterMoving = false, autoFaceActive = false;
-    private double targetShooterVelocity = 0;
-
-    // Timers
-    private ElapsedTime pulseTimer = new ElapsedTime();
-    private double pulseEndTime = 0, pulseDirection = 0;
-    private ElapsedTime emptyTimer = new ElapsedTime();
-    private ElapsedTime blinkIntervalTimer = new ElapsedTime();
-
-    // Alert Logic
-    private boolean bucketWasEmpty = false;
-    private boolean isAlertingEmpty = false;
+    // Logic Variables
+    private boolean shooterOn = false, autoFaceOn = false, wasEmpty = false, isAlertingEmpty = false;
+    private double targetVelo = 0, pulseEndTime = 0, pulseDir = 0;
+    private ElapsedTime emptyTimer = new ElapsedTime(), blinkTimer = new ElapsedTime(), pulseTimer = new ElapsedTime();
     private int blinkCount = 0;
-
-    // Trackers
-    private boolean lastRightBumper2 = false, lastLeftBumper1 = false, lastX2 = false, lastB2 = false;
+    private boolean lastRB2 = false, lastLB1 = false, lastX2 = false, lastB2 = false;
 
     // Constants
-    final double EMPTY_LIMIT = 8.0;
-    final double minDis = 53, maxDis = 121, minVelo = 2400, maxVelo = 2780;
+    final double EMPTY_CM = 8.0, minD = 53, maxD = 121, minV = 2400, maxV = 2780;
     private webCamOp camera;
 
     @Override
     public void init() {
-        lf_Drive = hardwareMap.get(DcMotorEx.class, "lf_Drive");
-        rf_Drive = hardwareMap.get(DcMotorEx.class, "rf_Drive");
-        lb_Drive = hardwareMap.get(DcMotorEx.class, "lb_Drive");
-        rb_Drive = hardwareMap.get(DcMotorEx.class, "rb_Drive");
+        lf = hardwareMap.get(DcMotorEx.class, "lf_Drive");
+        rf = hardwareMap.get(DcMotorEx.class, "rf_Drive");
+        lb = hardwareMap.get(DcMotorEx.class, "lb_Drive");
+        rb = hardwareMap.get(DcMotorEx.class, "rb_Drive");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         leftAdvancer = hardwareMap.get(CRServo.class, "leftAdvancer");
         rightAdvancer = hardwareMap.get(CRServo.class, "rightAdvancer");
         blinkin = hardwareMap.get(Servo.class, "blinkin");
-        distLeft = hardwareMap.get(DistanceSensor.class, "distLeft");
-        distRight = hardwareMap.get(DistanceSensor.class, "distRight");
-
-        lf_Drive.setDirection(DcMotorEx.Direction.REVERSE);
-        lb_Drive.setDirection(DcMotorEx.Direction.REVERSE);
-        shooter.setDirection(DcMotorEx.Direction.REVERSE);
+        distL = hardwareMap.get(DistanceSensor.class, "distLeft");
+        distR = hardwareMap.get(DistanceSensor.class, "distRight");
+        voltSensor = hardwareMap.voltageSensor.iterator().next();
         shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         camera = new webCamOp(hardwareMap);
     }
 
     @Override
+    public void init_loop() { handleBatteryMonitor(); }
+
+    @Override
+    public void start() { resetRuntime(); }
+
+    @Override
     public void loop() {
         camera.update();
-
-        // --- BUCKET MONITORING ---
-        boolean currentlyEmpty = (distLeft.getDistance(DistanceUnit.CM) > EMPTY_LIMIT &&
-                distRight.getDistance(DistanceUnit.CM) > EMPTY_LIMIT);
-        if (currentlyEmpty) {
-            if (!bucketWasEmpty) { emptyTimer.reset(); bucketWasEmpty = true; }
-            if (emptyTimer.milliseconds() > 500 && !isAlertingEmpty) {
-                isAlertingEmpty = true; blinkCount = 0; blinkIntervalTimer.reset();
-            }
-        } else { bucketWasEmpty = false; }
-
-        // --- CONTROLS ---
-        if (gamepad1.left_bumper && !lastLeftBumper1) autoFaceActive = !autoFaceActive;
-        lastLeftBumper1 = gamepad1.left_bumper;
-        autoFaceControl(gamepad1.left_stick_y, -gamepad1.left_stick_x, gamepad1.right_stick_x);
-
-        calculateShooterVelocity();
-        if (gamepad2.right_bumper && !lastRightBumper2) shooterMoving = !shooterMoving;
-        lastRightBumper2 = gamepad2.right_bumper;
-        if (shooterMoving) shooter.setVelocity(targetShooterVelocity); else shooter.setVelocity(0);
-
-        handleTimedAdvancers();
-        updateLEDs();
-    }
-
-    public void updateLEDs() {
-        // 1. URGENT EMPTY STROBE (Priority 1)
-        if (isAlertingEmpty) {
-            if (blinkCount < 10) {
-                if (blinkIntervalTimer.milliseconds() > 50) { blinkCount++; blinkIntervalTimer.reset(); }
-                blinkin.setPosition(blinkCount % 2 == 0 ? 0.6145 : 0.9995);
-                return;
-            } else { isAlertingEmpty = false; }
-        }
-
         AprilTagDetection tag = getTargetTag();
 
-        // 2. OUT OF RANGE ALERT (Priority 2)
-        // If we see a tag, but it's outside our min/max shooting distances
-        if (tag != null && (tag.ftcPose.range < minDis || tag.ftcPose.range > maxDis)) {
-            // 0.9145 is the PWM for Violet. We use a simple blink here.
-            if ((System.currentTimeMillis() / 250) % 2 == 0) {
-                blinkin.setPosition(0.9145); // Violet
+        handleBucketCheck();
+        handleDrivetrain(tag);
+        handleShooter(tag);
+        handleAdvancers();
+        updateLEDs(tag);
+    }
+
+    // --- LOGIC VOIDS ---
+
+    void handleBatteryMonitor() {
+        double v = voltSensor.getVoltage();
+        if (v > 13.5) blinkin.setPosition(0.7745);
+        else if (v > 12.5) blinkin.setPosition(0.6445);
+        else blinkin.setPosition(0.6145);
+        telemetry.addData("Battery", "%.2fV", v);
+    }
+
+    void handleBucketCheck() {
+        boolean empty = (distL.getDistance(DistanceUnit.CM) > EMPTY_CM && distR.getDistance(DistanceUnit.CM) > EMPTY_CM);
+        if (empty) {
+            if (!wasEmpty) { emptyTimer.reset(); wasEmpty = true; }
+            if (emptyTimer.milliseconds() > 500 && !isAlertingEmpty) { isAlertingEmpty = true; blinkCount = 0; blinkTimer.reset(); }
+        } else wasEmpty = false;
+    }
+
+    void handleDrivetrain(AprilTagDetection tag) {
+        if (gamepad1.left_bumper && !lastLB1) autoFaceOn = !autoFaceOn;
+        lastLB1 = gamepad1.left_bumper;
+
+        double turn = gamepad1.right_stick_x;
+        if (autoFaceOn && tag != null) turn = Range.clip(-tag.ftcPose.bearing * 0.02, -0.4, 0.4);
+
+        double f = gamepad1.left_stick_y, s = -gamepad1.left_stick_x;
+        double d = Math.max(Math.abs(f) + Math.abs(s) + Math.abs(turn), 1);
+        lf.setPower((f + s + turn) / d); rf.setPower((f - s - turn) / d);
+        lb.setPower((f - s + turn) / d); rb.setPower((f + s - turn) / d);
+    }
+
+    void handleShooter(AprilTagDetection tag) {
+        if (gamepad2.right_bumper && !lastRB2) shooterOn = !shooterOn;
+        lastRB2 = gamepad2.right_bumper;
+        if (tag != null) targetVelo = Range.clip(((tag.ftcPose.range - minD)/(maxD - minD)) * (maxV - minV) + minV, minV, maxV);
+        else targetVelo = maxV;
+        shooter.setVelocity(shooterOn ? targetVelo : 0);
+    }
+
+    void handleAdvancers() {
+        if (gamepad2.x && !lastX2) { pulseDir = 1.0; pulseEndTime = pulseTimer.milliseconds() + 50; }
+        else if (gamepad2.b && !lastB2) { pulseDir = -1.0; pulseEndTime = pulseTimer.milliseconds() + 50; }
+        lastX2 = gamepad2.x; lastB2 = gamepad2.b;
+        if (pulseTimer.milliseconds() < pulseEndTime) { leftAdvancer.setPower(pulseDir); rightAdvancer.setPower(pulseDir); }
+        else { leftAdvancer.setPower(0); rightAdvancer.setPower(0); }
+    }
+
+    void updateLEDs(AprilTagDetection tag) {
+        // 1. HARDWARE FAIL (Priority 1)
+        if (Double.isNaN(distL.getDistance(DistanceUnit.CM))) {
+            blinkin.setPosition((System.currentTimeMillis() / 200) % 2 == 0 ? 0.5745 : 0.9995);
+            return;
+        }
+
+        // 2. MATCH TIMER (Priority 2)
+        double matchTime = getRuntime();
+        if (matchTime > 115) { // Last 5 Seconds (Red/White Strobe)
+            blinkin.setPosition((System.currentTimeMillis() / 100) % 2 == 0 ? 0.6145 : 0.3845);
+            return;
+        }
+        else if (matchTime > 90) { // Last 30 Seconds (Solid Gold)
+            blinkin.setPosition(0.6745);
+            return;
+        }
+
+        // 3. EMPTY BUCKET (Priority 3 - Blinks 5 Times)
+        if (isAlertingEmpty) {
+            if (blinkCount < 10) { // 10 changes = 5 full blinks
+                if (blinkTimer.milliseconds() > 50) {
+                    blinkCount++;
+                    blinkTimer.reset();
+                }
+                blinkin.setPosition(blinkCount % 2 == 0 ? 0.6145 : 0.9995);
+                return;
             } else {
-                blinkin.setPosition(0.9995); // Off
+                isAlertingEmpty = false; // Reset after 5 blinks
+            }
+        }
+
+        // 4. AUTO-FACE LOCK (Priority 4)
+        if (autoFaceOn) {
+            if (tag == null) { // Searching
+                blinkin.setPosition((System.currentTimeMillis() / 300) % 2 == 0 ? 0.8745 : 0.9995);
+            } else if (Math.abs(tag.ftcPose.bearing) > 5) { // Partial Lock
+                blinkin.setPosition(0.8145);
+            } else { // Perfect Lock
+                blinkin.setPosition(0.8745);
             }
             return;
         }
 
-        // 3. COMBAT STATUS (Priority 3)
-        boolean shooterReady = shooterMoving && (Math.abs(shooter.getVelocity() - targetShooterVelocity) < 60);
-        boolean faceReady = autoFaceActive && (tag != null);
-
-        if (shooterReady && faceReady) blinkin.setPosition(0.4745); // Green Pulse
-        else if (shooterReady) blinkin.setPosition(0.7745);         // Solid Green
-        else if (faceReady) blinkin.setPosition(0.8745);            // Solid Blue
-        else blinkin.setPosition(0.6445);                           // Solid orange
-    }
-
-    // Standard helper methods...
-    public void handleTimedAdvancers() {
-        if (gamepad2.x && !lastX2) { pulseDirection = 1.0; pulseEndTime = pulseTimer.milliseconds() + 50; }
-        else if (gamepad2.b && !lastB2) { pulseDirection = -1.0; pulseEndTime = pulseTimer.milliseconds() + 50; }
-        lastX2 = gamepad2.x; lastB2 = gamepad2.b;
-        if (pulseTimer.milliseconds() < pulseEndTime) {
-            leftAdvancer.setPower(pulseDirection); rightAdvancer.setPower(pulseDirection);
-        } else { leftAdvancer.setPower(0); rightAdvancer.setPower(0); pulseDirection = 0; }
-    }
-
-    public void autoFaceControl(double f, double s, double r) {
-        double turn = r;
-        if (autoFaceActive) {
-            AprilTagDetection tag = getTargetTag();
-            if (tag != null) turn = Range.clip(-tag.ftcPose.bearing * 0.02, -0.4, 0.4);
+        // 5. OUT OF RANGE (Priority 5)
+        if (tag != null && (tag.ftcPose.range < minD || tag.ftcPose.range > maxD)) {
+            blinkin.setPosition((System.currentTimeMillis() / 250) % 2 == 0 ? 0.9145 : 0.9995);
+            return;
         }
-        double d = Math.max(Math.abs(f) + Math.abs(s) + Math.abs(turn), 1);
-        lf_Drive.setPower((f + s + turn) / d); rf_Drive.setPower((f - s - turn) / d);
-        lb_Drive.setPower((f - s + turn) / d); rb_Drive.setPower((f + s - turn) / d);
-    }
 
-    public void calculateShooterVelocity() {
-        AprilTagDetection tag = getTargetTag();
-        if (tag != null) targetShooterVelocity = Range.clip(((tag.ftcPose.range - minDis)/(maxDis - minDis)) * (maxVelo - minVelo) + minVelo, minVelo, maxVelo);
-        else targetShooterVelocity = maxVelo;
+        // 6. SHOOTER READY & IDLE (Lowest Priority)
+        if (shooterOn && Math.abs(shooter.getVelocity() - targetVelo) < 60) {
+            blinkin.setPosition(0.4745); // Green Pulse
+        } else {
+            blinkin.setPosition(0.6145); // Solid Red Idle
+        }
     }
 
     private AprilTagDetection getTargetTag() {
