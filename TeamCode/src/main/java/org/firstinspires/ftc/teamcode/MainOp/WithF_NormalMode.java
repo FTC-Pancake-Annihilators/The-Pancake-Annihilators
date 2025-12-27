@@ -14,10 +14,10 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 @TeleOp(name = "Master_Bot_Final_Release")
 public class WithF_NormalMode extends OpMode {
-    // Hardware
+    // Introducing all the Hardware
     public DcMotorEx lf, rf, lb, rb, shooter;
     public CRServo leftAdvancer, rightAdvancer;
-    public RevBlinkinLedDriver blinkin;
+    public RevBlinkinLedDriver blinkin;//hopefully it works.
     public DistanceSensor distL, distR;
     public VoltageSensor voltSensor;
 
@@ -28,25 +28,25 @@ public class WithF_NormalMode extends OpMode {
     private int blinkCount = 0;
     private boolean lastRB2 = false, lastLB1 = false, lastX2 = false, lastB2 = false;
 
-    // Constants
+    // Constants for all
     final double EMPTY_CM = 8.0, minD = 53, maxD = 121, minV = 2400, maxV = 2780;
     private webCamOp camera;
 
     @Override
     public void init() {
-        // Drive Motors
+        // Initializing Drive Motors
         lf = hardwareMap.get(DcMotorEx.class, "lf_Drive");
         rf = hardwareMap.get(DcMotorEx.class, "rf_Drive");
         lb = hardwareMap.get(DcMotorEx.class, "lb_Drive");
         rb = hardwareMap.get(DcMotorEx.class, "rb_Drive");
 
-        // Mechanisms
+        // Initializing Mechanisms
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         leftAdvancer = hardwareMap.get(CRServo.class, "leftAdvancer");
         rightAdvancer = hardwareMap.get(CRServo.class, "rightAdvancer");
 
-        // Sensors & Indicators
-        blinkin = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
+        // Initializing Sensors & Indicators
+        blinkin = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");//HOPEFULLLLYYYY it works
         distL = hardwareMap.get(DistanceSensor.class, "distLeft");
         distR = hardwareMap.get(DistanceSensor.class, "distRight");
         voltSensor = hardwareMap.voltageSensor.iterator().next();
@@ -67,21 +67,22 @@ public class WithF_NormalMode extends OpMode {
 
     @Override
     public void loop() {
+        //make sure to Update the camara
         camera.update();
         AprilTagDetection tag = getTargetTag();
-
+        //run all Voids...
         handleBucketCheck();
         handleDrivetrain(tag);
         handleShooter(tag);
         handleAdvancers();
         updateLEDs(tag);
 
-        // Optional: Send time to Driver Hub for testing
+        //Send time to Driver Hub for testing
         telemetry.addData("Match Time", "%.1f", getRuntime());
         telemetry.update();
     }
 
-    // --- BATTERY CHECK (RUNS IN INIT) ---
+    // ----Battery CHECK-----
     void handleBatteryMonitor() {
         double v = voltSensor.getVoltage();
         if (v > 13.5) blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
@@ -103,7 +104,7 @@ public class WithF_NormalMode extends OpMode {
         } else wasEmpty = false;
     }
 
-    // --- DRIVING & AUTO-FACE ---
+    // --- DRIVING & AUTO-FACE-To-Goal ---
     void handleDrivetrain(AprilTagDetection tag) {
         if (gamepad1.left_bumper && !lastLB1) autoFaceOn = !autoFaceOn;
         lastLB1 = gamepad1.left_bumper;
@@ -117,21 +118,21 @@ public class WithF_NormalMode extends OpMode {
         lb.setPower((f - s + turn) / d); rb.setPower((f + s - turn) / d);
     }
 
-    // --- SHOOTER PHYSICS ---
+    // --- SHOOTER ---
     void handleShooter(AprilTagDetection tag) {
         if (gamepad2.right_bumper && !lastRB2) shooterOn = !shooterOn;
         lastRB2 = gamepad2.right_bumper;
 
         if (tag != null) {
-            // LERP math for dynamic RPM based on distance
+            // This allows us to to get the Target Velocity by using the AprilTag
             targetVelo = Range.clip(((tag.ftcPose.range - minD)/(maxD - minD)) * (maxV - minV) + minV, minV, maxV);
         } else {
-            targetVelo = maxV;
+            targetVelo = maxV;// We use maxV because we are comfortable shooting from the Far Zone.
         }
         shooter.setVelocity(shooterOn ? targetVelo : 0);
     }
 
-    // --- SERVO ADVANCERS ---
+    // --- FEEDERS ---
     void handleAdvancers() {
         if (gamepad2.x && !lastX2) { pulseDir = 1.0; pulseEndTime = pulseTimer.milliseconds() + 50; }
         else if (gamepad2.b && !lastB2) { pulseDir = -1.0; pulseEndTime = pulseTimer.milliseconds() + 50; }
@@ -144,9 +145,9 @@ public class WithF_NormalMode extends OpMode {
         }
     }
 
-    // --- LED MASTER CONTROL (PRIORITY SYSTEM) ---
+    // ---LEDS---
     void updateLEDs(AprilTagDetection tag) {
-        // PRIORITY 1: HARDWARE FAIL
+        // PRIORITY 1: this tells us if any of the hardware failed.
         if (Double.isNaN(distL.getDistance(DistanceUnit.CM))) {
             blinkin.setPattern((System.currentTimeMillis() / 200) % 2 == 0 ?
                     RevBlinkinLedDriver.BlinkinPattern.HOT_PINK : RevBlinkinLedDriver.BlinkinPattern.BLACK);
@@ -155,20 +156,20 @@ public class WithF_NormalMode extends OpMode {
 
         double matchTime = getRuntime();
 
-        // PRIORITY 2: MATCH TIMER (THE PANIC ZONE)
+        // PRIORITY 2: Match timer.
         if (matchTime > 115) {
             blinkin.setPattern((System.currentTimeMillis() / 100) % 2 == 0 ?
                     RevBlinkinLedDriver.BlinkinPattern.RED : RevBlinkinLedDriver.BlinkinPattern.WHITE);
             return;
         }
 
-        // PRIORITY 3: ENDGAME NOTIFICATION (90s to 100s Window)
+        // PRIORITY 3: endgame notification the first 10 secs.
         if (matchTime > 90 && matchTime < 100) {
             blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.GOLD);
             return;
         }
 
-        // PRIORITY 4: EMPTY BUCKET ALERT (5 Blinks)
+        // PRIORITY 4: 5 blicks to tell us if the bucket is empty.
         if (isAlertingEmpty) {
             if (blinkCount < 10) {
                 if (blinkTimer.milliseconds() > 50) { blinkCount++; blinkTimer.reset(); }
@@ -178,7 +179,7 @@ public class WithF_NormalMode extends OpMode {
             } else { isAlertingEmpty = false; }
         }
 
-        // PRIORITY 5: TARGETING FEEDBACK
+        // PRIORITY 5: tell the status of the auto turn if it's taken place.
         if (autoFaceOn) {
             if (tag == null) {
                 blinkin.setPattern((System.currentTimeMillis() / 300) % 2 == 0 ?
@@ -191,18 +192,20 @@ public class WithF_NormalMode extends OpMode {
             return;
         }
 
-        // PRIORITY 6: RANGE CHECK
+        // PRIORITY 6: tells if the robot is in the allowed range, so that the dirver knows if he can shoot are not.
         if (tag != null && (tag.ftcPose.range < minD || tag.ftcPose.range > maxD)) {
             blinkin.setPattern((System.currentTimeMillis() / 250) % 2 == 0 ?
                     RevBlinkinLedDriver.BlinkinPattern.VIOLET : RevBlinkinLedDriver.BlinkinPattern.BLACK);
             return;
         }
 
-        // PRIORITY 7: READY & IDLE
+        // PRIORITY 7: This tells us if the shooter is at the right speed whenn the driver turns the shooter on.
         if (shooterOn && Math.abs(shooter.getVelocity() - targetVelo) < 60) {
             blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.BEATS_PER_MINUTE_FOREST_PALETTE);
         } else {
-            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+
+            //normal color which represents our team..
+            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.ORANGE);
         }
     }
 
