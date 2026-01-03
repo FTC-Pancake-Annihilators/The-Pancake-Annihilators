@@ -35,16 +35,17 @@ public class Bot_2_withF extends OpMode {
     private double targetShooterVelocity = 0;
 
     // Tuning
-    final double minDis = 53, maxDis = 121;
-    final double minVelo = 2400, maxVelo = 2780;
+    double minDis = 53;        // minimum distance (mm)
+    double maxDis = 121;// maximum distance (mm)
+    double minVelo = 2400;     // min shooter velocity
+    double maxVelo = 2780;    // max shooter velocity
     final double TURN_GAIN = 0.02, MAX_AUTO_TURN = 0.4;
-    private RevBlinkinLedDriver blinkIn;
+
 
     private webCamOp camera;
 
     @Override
     public void init() {
-        blinkIn = hardwareMap.get(RevBlinkinLedDriver.class, "LED");
         lf_Drive = hardwareMap.get(DcMotorEx.class, "lf_Drive");
         rf_Drive = hardwareMap.get(DcMotorEx.class, "rf_Drive");
         lb_Drive = hardwareMap.get(DcMotorEx.class, "lb_Drive");
