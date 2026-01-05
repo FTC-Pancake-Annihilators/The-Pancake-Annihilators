@@ -20,12 +20,26 @@ public class Constants {
     public static final double farShootPower = 0;
     public static PIDFCoefficients shooterCoefficients = new PIDFCoefficients(300, 0,0,10);
 
-    public static final Pose redCloseShoot = new Pose(76,76,Math.toRadians(135));
-    public static final Pose blueCloseShoot = new Pose(68,72, Math.toRadians(-135));
-    public static final Pose farRedShoot = new Pose(86, 16, 2.78);
-    public static final Pose farBlueShoot = new Pose(58, 18, -2.7);
-    public static final Pose redPark = new Pose(35,30, 0);
-    public static final Pose bluePark = new Pose(100,30, 0);
+    public static final Pose redStartFarPose = new Pose(119, 128, Math.toRadians(45));   // You had two redStartNear — assuming far/near
+    public static final Pose blueStartFarPose = new Pose(24.5, 128, Math.toRadians(135));
+
+    public static final Pose redStartNearPose = new Pose(87, 8, Math.toRadians(90));
+    public static final Pose blueStartNearPose = new Pose(55, 8, Math.toRadians(90));
+
+    // Shooting zones
+    public static final Pose redCloseShoot = new Pose(87, 87, Math.toRadians(45));
+    public static final Pose blueCloseShoot = new Pose(55, 87, Math.toRadians(135));
+
+    public static final Pose farRedShoot = new Pose(60, 12, Math.toRadians(111));
+    public static final Pose farBlueShoot = new Pose(130, 132, Math.toRadians(69));
+
+    // Parking
+    public static final Pose redPark = new Pose(38, 33, Math.toRadians(90));
+    public static final Pose bluePark = new Pose(104, 33, Math.toRadians(90));
+
+    // Gate ram poses (back of robot hits gate)
+    public static final Pose redGateApproach = new Pose(129, 69, Math.toRadians(180));  // Face backward
+    public static final Pose blueGateApproach = new Pose(15, 69, Math.toRadians(0));
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(11.0);
     public static MecanumConstants driveConstants = new MecanumConstants()

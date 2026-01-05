@@ -12,10 +12,8 @@ import com.pedropathing.paths.PathChain;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver;  // I²C driver
-import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver.Artboard;  // Artboard enum
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.Mechanisms.Intake;
@@ -33,6 +31,7 @@ public class subsystems {
 
     public AllianceColor allianceColor;
 
+    // Public for telemetry
     public boolean autoAimActive = false;
     public boolean goToNearActive = false;
     public boolean goToFarActive = false;
@@ -51,8 +50,18 @@ public class subsystems {
 
     private Supplier<PathChain> nearZonePath, farZonePath, parkPath, gatePath;
 
-    // Prism RGB LED Driver (I²C mode - full dynamic patterns)
-    private GoBildaPrismDriver prism;
+    // Prism LED Driver - PWM mode (configured as Servo)
+    private Servo prismLED;
+
+    // PWM positions (servo.setPosition) based on manual table page 5
+    // µsec to position: value / 2000 (e.g., 1000µsec = 0.5)
+    // Tested starting points - fine-tune on your robot!
+    private static final double ALLIANCE_RED = 0.55;        // Solid red (~1100µsec in solid color range)
+    private static final double ALLIANCE_BLUE = 0.95;       // Solid blue (~1900µsec in solid color range)
+    private static final double CYCLE_FLASH = 0.295;        // Emergency Lights flashing (580-589µsec ≈ 0.29-0.294)
+    private static final double DEFENSE_STROBE = 0.60;      // Purple/violet solid (~1200µsec)
+    private static final double SHOOTER_READY = 0.70;       // Sine Wave green pulse (~1400µsec)
+    private static final double PATH_RAINBOW = 1.0;         // Rainbow Snakes chase (high end 2350-2500µsec, capped at 1.0)
 
     public subsystems(HardwareMap hwMap, AllianceColor color) {
         this.allianceColor = color;
@@ -61,11 +70,8 @@ public class subsystems {
         shooter = new Shooter(hwMap, Constants.shooterCoefficients);
         transfer = new Transfer(hwMap);
 
-        // Initialize Prism I²C driver (configure as "prism" in RC phone, type GoBildaPrismDriver)
-        prism = hwMap.get(GoBildaPrismDriver.class, "prism");
-
-        // Optional: Disable boot animation for full code control (set once)
-        // prism.enableDefaultBootArtboard(false);
+        // Prism LED PWM mode - name "prismLED" in config
+        prismLED = hwMap.get(Servo.class, "prismLED");
 
         if (headingPid == null) {
             headingPid = new PIDFController(Constants.followerConstants.getCoefficientsHeadingPIDF());
@@ -73,47 +79,36 @@ public class subsystems {
 
         definePaths();
 
-        // Initial LED: Alliance Artboard
-        setAllianceArtboard();
+        setAllianceLED();  // Start with alliance color
     }
 
-    // Set alliance-specific Artboard (pre-created with Prism Configurator)
-    private void setAllianceArtboard() {
-        if (allianceColor.isRed()) {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_0);  // Red theme (solid, pulse, etc.)
-        } else {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_1);  // Blue theme
-        }
+    private void setAllianceLED() {
+        prismLED.setPosition(allianceColor.isRed() ? ALLIANCE_RED : ALLIANCE_BLUE);
     }
 
-    // Dynamic LED update with priority (like your RevBlinkin example)
+    // Update LEDs based on robot state - call every loop or after state changes
     public void updateLEDs() {
-        // PRIORITY 1: Cycle active → Flash yellow/orange (Artboard 2)
         if (cycleState != CycleState.IDLE) {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_2);
+            prismLED.setPosition(CYCLE_FLASH);  // Flashing during auto cycle
             return;
         }
 
-        // PRIORITY 2: Defense mode → Purple strobe (Artboard 3)
         if (defenseActive) {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_3);
+            prismLED.setPosition(DEFENSE_STROBE);  // Purple for defense
             return;
         }
 
-        // PRIORITY 3: Shooter ready + auto-aim → Green heartbeat (Artboard 4)
         if (shooterState == ShooterState.AUTO_AIM && autoAimActive) {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_4);
+            prismLED.setPosition(SHOOTER_READY);  // Green pulse when shooter ready + aiming
             return;
         }
 
-        // PRIORITY 4: Path following → Rainbow chase (Artboard 5)
         if (getFollower().isBusy()) {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_5);
+            prismLED.setPosition(PATH_RAINBOW);  // Rainbow chase while following path
             return;
         }
 
-        // DEFAULT: Alliance color
-        setAllianceArtboard();
+        setAllianceLED();  // Default = alliance color
     }
 
     public com.pedropathing.follower.Follower getFollower() {
@@ -141,12 +136,9 @@ public class subsystems {
 
         gatePath = () -> follower.pathBuilder()
                 .addPath(new Path(new BezierLine(follower::getPose,
-                        allianceColor.isRed()
-                                ? new Pose(120, 30, Math.toRadians(180))
-                                : new Pose(24, 114, Math.toRadians(0))
-                )))
+                        allianceColor.isRed() ? Constants.redGateApproach : Constants.blueGateApproach)))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading,
-                        allianceColor.isRed() ? Math.toRadians(180) : Math.toRadians(0), 0.8))
+                        allianceColor.isRed() ? Constants.redGateApproach.getHeading() : Constants.blueGateApproach.getHeading(), 0.8))
                 .build();
     }
 
@@ -192,7 +184,6 @@ public class subsystems {
             shooterState = ShooterState.AUTO_AIM;
             defenseActive = true;
             autoSpeed();
-
             headingPid.updatePosition(follower.getHeading());
             headingPid.setTargetPosition(allianceColor.isRed() ? Math.toRadians(90) : Math.toRadians(-90));
         } else {
@@ -203,7 +194,7 @@ public class subsystems {
             autoSpeed();
         }
 
-        updateLEDs();  // Update on shooter/defense change
+        updateLEDs();
     }
 
     private void autoSpeed() {
@@ -245,7 +236,7 @@ public class subsystems {
             goToNearActive = goToFarActive = goToGateActive = parkActive = false;
         }
 
-        updateLEDs();  // Update on path start/complete
+        updateLEDs();
     }
 
     private void cancelPathModes() {
@@ -291,7 +282,7 @@ public class subsystems {
                 break;
         }
 
-        updateLEDs();  // Flash on cycle start/change
+        updateLEDs();
     }
 
     private static double getTargetHeading(double x, double y, AllianceColor alliance) {

@@ -9,8 +9,8 @@ import org.firstinspires.ftc.teamcode.Mechanisms.subsystems;
 
 import org.firstinspires.ftc.teamcode.util.AllianceColor;
 
-@TeleOp(name = "PP-Blue ")
-public class PPBlue extends LinearOpMode {
+@TeleOp(name = "PP-Red")
+public class PPRed extends LinearOpMode {
 
     subsystems mech;
 
