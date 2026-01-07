@@ -31,7 +31,6 @@ public class subsystems {
 
     public AllianceColor allianceColor;
 
-    // Public for telemetry
     public boolean autoAimActive = false;
     public boolean goToNearActive = false;
     public boolean goToFarActive = false;
@@ -48,20 +47,22 @@ public class subsystems {
 
     private static PIDFController headingPid;
 
-    private Supplier<PathChain> nearZonePath, farZonePath, parkPath, gatePath;
+    // Made public for Auto OpModes
+    public Supplier<PathChain> nearZonePath, farZonePath, parkPath, gatePath;
 
-    // Prism LED Driver - PWM mode (configured as Servo)
     private Servo prismLED;
 
-    // PWM positions (servo.setPosition) based on manual table page 5
-    // µsec to position: value / 2000 (e.g., 1000µsec = 0.5)
-    // Tested starting points - fine-tune on your robot!
-    private static final double ALLIANCE_RED = 0.55;        // Solid red (~1100µsec in solid color range)
-    private static final double ALLIANCE_BLUE = 0.95;       // Solid blue (~1900µsec in solid color range)
-    private static final double CYCLE_FLASH = 0.295;        // Emergency Lights flashing (580-589µsec ≈ 0.29-0.294)
-    private static final double DEFENSE_STROBE = 0.60;      // Purple/violet solid (~1200µsec)
-    private static final double SHOOTER_READY = 0.70;       // Sine Wave green pulse (~1400µsec)
-    private static final double PATH_RAINBOW = 1.0;         // Rainbow Snakes chase (high end 2350-2500µsec, capped at 1.0)
+    // PWM positions (test & adjust on robot from manual table)
+    private static final double DEFAULT_ORANGE = 0.55;     // Solid orange idle
+    private static final double CYCLE_FLASH = 0.295;       // Emergency Lights flashing
+    private static final double DEFENSE_STROBE = 0.60;     // Purple/violet
+    private static final double SHOOTER_READY = 0.70;      // Green pulse/sine wave
+    private static final double PATH_RAINBOW = 1.0;        // Rainbow Snakes chase
+
+    // Button tracking for toggles
+    private boolean lastLeftBumper = false;
+    private boolean lastRightBumper = false;
+    private boolean lastRightTrigger = false;
 
     public subsystems(HardwareMap hwMap, AllianceColor color) {
         this.allianceColor = color;
@@ -70,7 +71,6 @@ public class subsystems {
         shooter = new Shooter(hwMap, Constants.shooterCoefficients);
         transfer = new Transfer(hwMap);
 
-        // Prism LED PWM mode - name "prismLED" in config
         prismLED = hwMap.get(Servo.class, "prismLED");
 
         if (headingPid == null) {
@@ -79,36 +79,28 @@ public class subsystems {
 
         definePaths();
 
-        setAllianceLED();  // Start with alliance color
+        // Send PWM signal early to avoid white boot / snake demo
+        prismLED.setPosition(DEFAULT_ORANGE);
     }
 
-    private void setAllianceLED() {
-        prismLED.setPosition(allianceColor.isRed() ? ALLIANCE_RED : ALLIANCE_BLUE);
-    }
-
-    // Update LEDs based on robot state - call every loop or after state changes
     public void updateLEDs() {
         if (cycleState != CycleState.IDLE) {
-            prismLED.setPosition(CYCLE_FLASH);  // Flashing during auto cycle
+            prismLED.setPosition(CYCLE_FLASH);
             return;
         }
-
         if (defenseActive) {
-            prismLED.setPosition(DEFENSE_STROBE);  // Purple for defense
+            prismLED.setPosition(DEFENSE_STROBE);
             return;
         }
-
         if (shooterState == ShooterState.AUTO_AIM && autoAimActive) {
-            prismLED.setPosition(SHOOTER_READY);  // Green pulse when shooter ready + aiming
+            prismLED.setPosition(SHOOTER_READY);
             return;
         }
-
         if (getFollower().isBusy()) {
-            prismLED.setPosition(PATH_RAINBOW);  // Rainbow chase while following path
+            prismLED.setPosition(PATH_RAINBOW);
             return;
         }
-
-        setAllianceLED();  // Default = alliance color
+        prismLED.setPosition(DEFAULT_ORANGE);  // Solid orange idle
     }
 
     public com.pedropathing.follower.Follower getFollower() {
@@ -149,20 +141,33 @@ public class subsystems {
         double strafe = -gp1.left_stick_x;
         double turn = -gp1.right_stick_x;
 
+        double stickMagnitude = Math.hypot(strafe, forward) + Math.abs(turn);
+
+        // Cancel path if joystick >15%
+        if (stickMagnitude > 0.15 && (goToNearActive || goToFarActive || goToGateActive || parkActive)) {
+            goToNearActive = goToFarActive = goToGateActive = parkActive = false;
+            follower.breakFollowing();
+            follower.startTeleopDrive(true);
+        }
+
+        // Normal drive
         if (!autoAimActive && !goToNearActive && !goToFarActive && !goToGateActive && !parkActive && !defenseActive) {
             follower.setTeleOpDrive(forward, strafe, turn, false, allianceColor.isRed() ? 0 : Math.toRadians(180));
         }
 
-        if (gp1.left_bumper) {
-            autoAimActive = true;
+        // Auto-face goal (toggle)
+        if (gp1.left_bumper && !lastLeftBumper) {
+            autoAimActive = !autoAimActive;
+        }
+        lastLeftBumper = gp1.left_bumper;
+
+        if (autoAimActive) {
             headingPid.updatePosition(follower.getHeading());
             headingPid.setTargetPosition(getTargetHeading(follower.getPose().getX(), follower.getPose().getY(), allianceColor));
             follower.setTeleOpDrive(forward, strafe, headingPid.run(), false, allianceColor.isRed() ? 0 : Math.toRadians(180));
-        } else {
-            autoAimActive = false;
         }
 
-        updateLEDs();  // Update on auto-aim change
+        updateLEDs();
     }
 
     public void intake(Gamepad gp2) {
@@ -180,29 +185,28 @@ public class subsystems {
     }
 
     public void shooter(Gamepad gp2) {
-        if (gp2.right_bumper) {
+        // Toggle defense + shooter
+        if (gp2.right_bumper && !lastRightBumper) {
+            defenseActive = !defenseActive;
             shooterState = ShooterState.AUTO_AIM;
-            defenseActive = true;
-            autoSpeed();
+        }
+        lastRightBumper = gp2.right_bumper;
+
+        if (defenseActive) {
+            shooter.adaptive(follower.getPose().getX(), follower.getPose().getY(), allianceColor);
             headingPid.updatePosition(follower.getHeading());
             headingPid.setTargetPosition(allianceColor.isRed() ? Math.toRadians(90) : Math.toRadians(-90));
-        } else {
-            defenseActive = false;
         }
 
         if (shooterState == ShooterState.AUTO_AIM) {
-            autoSpeed();
+            shooter.adaptive(follower.getPose().getX(), follower.getPose().getY(), allianceColor);
         }
 
         updateLEDs();
     }
 
-    private void autoSpeed() {
-        Pose pose = follower.getPose();
-        shooter.adaptive(pose.getX(), pose.getY(), allianceColor);
-    }
-
     public void pathsAndModes(Gamepad gp1) {
+        // Paths (press to start)
         if (gp1.dpad_up && !goToNearActive) {
             goToNearActive = true;
             cancelPathModes();
@@ -228,10 +232,16 @@ public class subsystems {
             follower.followPath(parkPath.get());
         }
 
+        // Pose reset (alliance-specific)
         if (gp1.b) {
-            follower.setPose(new Pose(83, 88, Math.toRadians(90)));
+            if (allianceColor.isRed()) {
+                follower.setPose(new Pose(8, 8, Math.toRadians(90)));
+            } else {
+                follower.setPose(new Pose(135, 8, Math.toRadians(90)));
+            }
         }
 
+        // Auto-complete
         if ((goToNearActive || goToFarActive || goToGateActive || parkActive) && !follower.isBusy()) {
             goToNearActive = goToFarActive = goToGateActive = parkActive = false;
         }
@@ -244,11 +254,18 @@ public class subsystems {
     }
 
     public void cycle(Gamepad gp2) {
-        if (gp2.right_trigger > 0.5 && cycleState == CycleState.IDLE) {
-            cycleState = CycleState.FEED;
-            artifactsShot = 0;
-            cycleTimer.reset();
+        // Toggle cycle
+        if (gp2.right_trigger > 0.5 && !lastRightTrigger) {
+            if (cycleState == CycleState.IDLE) {
+                cycleState = CycleState.FEED;
+                artifactsShot = 0;
+                cycleTimer.reset();
+            } else {
+                cycleState = CycleState.IDLE;
+                transfer.reload();
+            }
         }
+        lastRightTrigger = gp2.right_trigger > 0.5;
 
         switch (cycleState) {
             case IDLE:
@@ -287,9 +304,9 @@ public class subsystems {
 
     private static double getTargetHeading(double x, double y, AllianceColor alliance) {
         if (alliance.isRed()) {
-            return MathFunctions.normalizeAngle(Math.atan2(141 - y, 141 - x) + Math.toRadians(91.5));
+            return MathFunctions.normalizeAngle(Math.atan2(144 - y, 144 - x) + Math.toRadians(91.5));
         } else {
-            return MathFunctions.normalizeAngle(Math.atan2(141 - y, 3 - x) + Math.toRadians(90));
+            return MathFunctions.normalizeAngle(Math.atan2(144 - y, 0 - x) + Math.toRadians(90));
         }
     }
 }

@@ -6,71 +6,86 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.pedropathing.control.PIDFCoefficients;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.AllianceColor;
 
 public class Shooter {
-    private PIDFController shooterPidf = null;
-    public DcMotorEx shooter = null;
-    public final double redPowerCoefficient = 1.1;
-    public final double bluePowerCoefficient = 1.1;
+    private PIDFController shooterPidf;
+    private DcMotorEx shooterMotor;
 
+    // Alliance multiplier (tune if one side shoots differently)
+    private final double RED_MULTIPLIER = 1.1;
+    private final double BLUE_MULTIPLIER = 1.1;
 
-    public Shooter (HardwareMap hwMap, PIDFCoefficients shooterCoefficients) {
-        shooter = hwMap.get(DcMotorEx.class, "shooter");
-        shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        shooter.setVelocityPIDFCoefficients(shooterCoefficients.P, shooterCoefficients.I, shooterCoefficients.D, shooterCoefficients.F);
+    // Safe velocity limits (degrees per second - tune on practice field!)
+    private static final double MIN_VELOCITY = 140.0;  // For close shots
+    private static final double MAX_VELOCITY = 320.0;  // For far shots
+
+    public Shooter(HardwareMap hwMap, PIDFCoefficients shooterCoefficients) {
+        shooterMotor = hwMap.get(DcMotorEx.class, "shooter");
+        shooterMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        shooterMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
+        // Correct: method calls with ()
+        shooterMotor.setVelocityPIDFCoefficients(
+                300,0,0,10
+        );
+
         shooterPidf = new PIDFController(shooterCoefficients);
     }
 
+    // Reverse pulse (only power used - brief)
     public void eject() {
-        shooter.setPower(-0.1);
+        shooterMotor.setPower(-0.1);
     }
-    public void adaptive(double x, double y, AllianceColor alliance) {
-        this.update(
-                this.getRegressionVelocity(
-                        this.getDistance(x, y, alliance),
-                        alliance
-                )
-        );
+
+    // Auto velocity from distance
+    public void adaptive(double robotX, double robotY, AllianceColor alliance) {
+        double distance = getDistanceToGoal(robotX, robotY, alliance);
+        double targetVelocity = getRegressionVelocity(distance, alliance);
+        setTargetVelocity(targetVelocity);
     }
 
     public void stop() {
-        shooter.setPower(0);
+        setTargetVelocity(0.0);
     }
+
     public void idle() {
-        shooter.setPower(0.2);
+        setTargetVelocity(50.0);  // Low spin
     }
 
     public void midFieldShoot() {
-        update(Constants.closeShootPower);
+        setTargetVelocity(Constants.midFieldVelocity);
     }
 
     public void farShoot() {
-        update(Constants.farShootPower);
+        setTargetVelocity(Constants.farVelocity);
     }
-    public void update(double targetVelocity) {
-        shooterPidf.updatePosition(shooter.getVelocity(AngleUnit.DEGREES));
+
+    // Set velocity with PIDF
+    private void setTargetVelocity(double targetVelocity) {
+        shooterPidf.updatePosition(shooterMotor.getVelocity(AngleUnit.DEGREES));
         shooterPidf.setTargetPosition(targetVelocity);
-        shooter.setPower(MathFunctions.clamp(shooterPidf.run(), -1, 1));
+        double pidPower = shooterPidf.run();
+        shooterMotor.setPower(MathFunctions.clamp(pidPower, -1.0, 1.0));
     }
-    public double getTarget() {
+
+    public double getTargetVelocity() {
         return shooterPidf.getTargetPosition();
     }
-    public double getDistance(double x, double y, AllianceColor alliance) {
+
+    private double getDistanceToGoal(double robotX, double robotY, AllianceColor alliance) {
         if (alliance.isRed()) {
-            return Math.sqrt(Math.pow(144-x, 2) + Math.pow(144-y, 2));
-        }
-        else {
-            return Math.sqrt(Math.pow(-x, 2) + Math.pow(144-y, 2));
+            return Math.hypot(144 - robotX, 144 - robotY);
+        } else {
+            return Math.hypot(robotX, 144 - robotY);  // Blue goal at (0,144)
         }
     }
-    public double getRegressionVelocity (double distance, AllianceColor alliance) {
-        //return 0.00365989 * Math.pow(distance, 2) + 0.217247 * distance +
-        //       (142.56245 * (alliance.isRed()? redPowerCoefficient : bluePowerCoefficient));
-        return 1.10033 * distance + 93.21422 * (alliance.isRed()? redPowerCoefficient : bluePowerCoefficient);
+
+    private double getRegressionVelocity(double distance, AllianceColor alliance) {
+        double baseVelocity = 1.10033 * distance + 93.21422;
+        double adjustedVelocity = baseVelocity * (alliance.isRed() ? RED_MULTIPLIER : BLUE_MULTIPLIER);
+        return Math.max(MIN_VELOCITY, Math.min(MAX_VELOCITY, adjustedVelocity));
     }
 }

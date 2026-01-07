@@ -4,35 +4,41 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver; // Import the driver
-import static org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver.Artboard;
 
-@TeleOp(name = "Master_Bot_Prism_Official")
+@TeleOp(name = "Master_Bot_Prism_PWM_NoSensors")
 public class WithF_NormalMode extends OpMode {
     // Hardware
     public DcMotorEx lf, rf, lb, rb, shooter;
     public CRServo leftAdvancer, rightAdvancer;
-    public GoBildaPrismDriver prism; // Official Driver class
-    public DistanceSensor distL, distR;
+    public Servo prismLED; // PWM mode - name "prismLED" in config
     public VoltageSensor voltSensor;
 
     // Logic States
-    private boolean shooterOn = false, autoFaceOn = false, wasEmpty = false, isAlertingEmpty = false;
+    private boolean shooterOn = false, autoFaceOn = false;
     private double targetVelo = 0, pulseEndTime = 0, pulseDir = 0;
-    private ElapsedTime emptyTimer = new ElapsedTime(), blinkTimer = new ElapsedTime(), pulseTimer = new ElapsedTime();
-    private int blinkCount = 0;
+    private ElapsedTime pulseTimer = new ElapsedTime();
     private boolean lastRB2 = false, lastLB1 = false, lastX2 = false, lastB2 = false;
 
     // Constants
-    final double EMPTY_CM = 8.0, minD = 53, maxD = 121, minV = 2400, maxV = 2780;
+    final double minD = 53, maxD = 121, minV = 2400, maxV = 2780;
     private webCamOp camera;
+
+    // PWM positions (from manual table - test & adjust)
+    private static final double HEALTHY_GREEN = 0.35;
+    private static final double LOW_BATTERY_RED = 0.55;
+    private static final double ENDGAME_WARNING = 0.295;  // Emergency Lights flash
+    private static final double ENDGAME_GOLD = 0.30;      // Orange/gold
+    private static final double AUTO_FACE_SEARCH = 0.92;  // Blue solid
+    private static final double AUTO_FACE_LOCKED = 0.92;  // Blue solid
+    private static final double OUT_OF_RANGE = 0.60;      // Purple
+    private static final double SHOOTER_READY = 0.35;     // Green pulse
+    private static final double DEFAULT_ORANGE = 0.55;    // Orange idle
 
     @Override
     public void init() {
@@ -44,11 +50,8 @@ public class WithF_NormalMode extends OpMode {
         leftAdvancer = hardwareMap.get(CRServo.class, "leftAdvancer");
         rightAdvancer = hardwareMap.get(CRServo.class, "rightAdvancer");
 
-        // Initialize Prism Driver
-        prism = hardwareMap.get(GoBildaPrismDriver.class, "prism");
+        prismLED = hardwareMap.get(Servo.class, "prismLED");
 
-        distL = hardwareMap.get(DistanceSensor.class, "distLeft");
-        distR = hardwareMap.get(DistanceSensor.class, "distRight");
         voltSensor = hardwareMap.voltageSensor.iterator().next();
 
         shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
@@ -57,10 +60,9 @@ public class WithF_NormalMode extends OpMode {
 
     @Override
     public void init_loop() {
-        // Battery check on initialization
         double v = voltSensor.getVoltage();
-        if (v > 13.0) prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_0); // Healthy (Green)
-        else prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_5); // Low (Red)
+        if (v > 13.0) prismLED.setPosition(HEALTHY_GREEN);
+        else prismLED.setPosition(LOW_BATTERY_RED);
     }
 
     @Override
@@ -71,7 +73,6 @@ public class WithF_NormalMode extends OpMode {
         camera.update();
         AprilTagDetection tag = getTargetTag();
 
-        handleBucketCheck();
         handleDrivetrain(tag);
         handleShooter(tag);
         handleAdvancers();
@@ -79,20 +80,6 @@ public class WithF_NormalMode extends OpMode {
 
         telemetry.addData("Match Time", "%.1f", getRuntime());
         telemetry.update();
-    }
-
-    // --- LOGIC FUNCTIONS ---
-
-    void handleBucketCheck() {
-        boolean empty = (distL.getDistance(DistanceUnit.CM) > EMPTY_CM && distR.getDistance(DistanceUnit.CM) > EMPTY_CM);
-        if (empty) {
-            if (!wasEmpty) { emptyTimer.reset(); wasEmpty = true; }
-            if (emptyTimer.milliseconds() > 500 && !isAlertingEmpty) {
-                isAlertingEmpty = true;
-                blinkCount = 0;
-                blinkTimer.reset();
-            }
-        } else wasEmpty = false;
     }
 
     void handleDrivetrain(AprilTagDetection tag) {
@@ -122,54 +109,40 @@ public class WithF_NormalMode extends OpMode {
         else { leftAdvancer.setPower(0); rightAdvancer.setPower(0); }
     }
 
-    // --- PRISM LED PRIORITY SYSTEM ---
+    // PWM LED Priority System (no hardware fail or bucket check)
     void updateLEDs(AprilTagDetection tag) {
-        // Priority 1: Hardware Fail
-        if (Double.isNaN(distL.getDistance(DistanceUnit.CM))) {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_4); // Set this to Pink Strobe
-            return;
-        }
-
         double matchTime = getRuntime();
 
-        // Priority 2: Match Warning (Last 5s)
+        // Priority 1: Last 5s warning
         if (matchTime > 115) {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_5); // Set this to Red/White Strobe
+            prismLED.setPosition(ENDGAME_WARNING); // Emergency Lights flash
             return;
         }
 
-        // Priority 3: Endgame (90s)
+        // Priority 2: Endgame (90-100s)
         if (matchTime > 90 && matchTime < 100) {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_2); // Set this to Gold
+            prismLED.setPosition(ENDGAME_GOLD); // Orange/gold
             return;
         }
 
-        // Priority 4: Empty Bucket Alert
-        if (isAlertingEmpty) {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_5); // Trigger Red Alert
-            // After 5 blinks logic can be added here or just let the user see it
-            if (blinkTimer.milliseconds() > 1000) isAlertingEmpty = false;
-            return;
-        }
-
-        // Priority 5: Auto-Face Lock
+        // Priority 3: Auto-Face
         if (autoFaceOn) {
-            if (tag == null) prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_3); // Searching Blue
-            else prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_1); // Locked Blue
+            if (tag == null) prismLED.setPosition(AUTO_FACE_SEARCH); // Blue solid
+            else prismLED.setPosition(AUTO_FACE_LOCKED); // Blue solid
             return;
         }
 
-        // Priority 6: Out of Range
+        // Priority 4: Out of Range
         if (tag != null && (tag.ftcPose.range < minD || tag.ftcPose.range > maxD)) {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_4); // Purple/Violet
+            prismLED.setPosition(OUT_OF_RANGE); // Purple
             return;
         }
 
-        // Priority 7: Shooter Ready
+        // Priority 5: Shooter Ready
         if (shooterOn && Math.abs(shooter.getVelocity() - targetVelo) < 60) {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_0); // Green
+            prismLED.setPosition(SHOOTER_READY); // Green pulse
         } else {
-            prism.loadAnimationsFromArtboard(Artboard.ARTBOARD_2); // Orange/Team Color
+            prismLED.setPosition(DEFAULT_ORANGE); // Orange idle
         }
     }
 

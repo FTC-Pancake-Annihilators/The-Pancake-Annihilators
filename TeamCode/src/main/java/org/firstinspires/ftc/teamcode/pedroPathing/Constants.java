@@ -16,17 +16,15 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Constants {
     public static Follower follower = null;
-    public static final double closeShootPower = 0;   //Targets 230, really reaches 140
-    public static final double farShootPower = 0;
+
     public static PIDFCoefficients shooterCoefficients = new PIDFCoefficients(300, 0,0,10);
 
-    public static final Pose redStartFarPose = new Pose(119, 128, Math.toRadians(45));   // You had two redStartNear — assuming far/near
-    public static final Pose blueStartFarPose = new Pose(24.5, 128, Math.toRadians(135));
 
-    public static final Pose redStartNearPose = new Pose(87, 8, Math.toRadians(90));
-    public static final Pose blueStartNearPose = new Pose(55, 8, Math.toRadians(90));
-
-    // Shooting zones
+    // Starting poses
+    public static final Pose redStartNear = new Pose(87, 8, Math.toRadians(90));
+    public static final Pose blueStartNear = new Pose(55, 8, Math.toRadians(90));
+    public static final Pose redStartFar = new Pose(119, 128, Math.toRadians(45));
+    public static final Pose blueStartFar = new Pose(24.5, 128, Math.toRadians(135));
     public static final Pose redCloseShoot = new Pose(87, 87, Math.toRadians(45));
     public static final Pose blueCloseShoot = new Pose(55, 87, Math.toRadians(135));
 
@@ -40,6 +38,8 @@ public class Constants {
     // Gate ram poses (back of robot hits gate)
     public static final Pose redGateApproach = new Pose(129, 69, Math.toRadians(180));  // Face backward
     public static final Pose blueGateApproach = new Pose(15, 69, Math.toRadians(0));
+    public static final double midFieldVelocity = 220.0;
+    public static final double farVelocity = 280.0;
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(11.0);
     public static MecanumConstants driveConstants = new MecanumConstants()
