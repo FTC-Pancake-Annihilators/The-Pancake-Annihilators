@@ -41,7 +41,12 @@ public class Constants {
     public static final double midFieldVelocity = 220.0;
     public static final double farVelocity = 280.0;
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(11.0);
+            .mass(7)
+            .useSecondaryTranslationalPIDF(true)
+            .useSecondaryHeadingPIDF(true)
+            .useSecondaryDrivePIDF(true);
+//            .forwardZeroPowerAcceleration(deceleration)
+//            .lateralZeroPowerAcceleration(deceleration);
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
             .rightFrontMotorName("rf_Drive")
@@ -52,6 +57,9 @@ public class Constants {
             .leftRearMotorDirection(DcMotorEx.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorEx.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorEx.Direction.FORWARD);
+//            .xVelocity()
+//            .yVelocity();
+
 
 
 
@@ -67,13 +75,18 @@ public class Constants {
             .rightFrontEncoderDirection(Encoder.FORWARD)
             .rightRearEncoderDirection(Encoder.FORWARD)
             .robotLength(14.25)
-            .robotWidth(17.6)
-            .forwardTicksToInches(-61.7)
-            .strafeTicksToInches(-2.08)
-            .turnTicksToInches(-0.02);
+            .robotWidth(17.6);
+//            .forwardTicksToInches(-61.7)
+//            .strafeTicksToInches(-2.08)
+//            .turnTicksToInches(-0.02);
+// DO the localization Test
+// Run the Tuning OpMode, then navigate under to Localization Test
+//On your computer, connect to your robot's Wi-Fi, and navigate to Panels or the FTC Dashboard. Panels is accessible at the ip address 192.168.43.1:8001 when connected to robot wifi.
+//You should see the robot's position on the field.
+//Observe the movements, make sure moving forward increases x and strafing left increases y.
 
-
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
+    public static PathConstraints pathConstraints = new PathConstraints(
+            0.99, 100, 1, 1);
 
 
 

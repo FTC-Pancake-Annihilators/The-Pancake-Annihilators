@@ -1,82 +1,38 @@
 package org.firstinspires.ftc.teamcode.MainOp;
 
-import com.pedropathing.geometry.Pose;  // Correct import (matches subsystems)
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Mechanisms.subsystems;
 import org.firstinspires.ftc.teamcode.util.AllianceColor;
+import org.firstinspires.ftc.teamcode.util.AllianceColor.Selection;
 
-@TeleOp(name = "PP-Blue")
-public class PPBlue extends LinearOpMode {
+@TeleOp(name = "PP-Blue", group = "Competition")
+public class PPBlue extends OpMode {
 
-    subsystems mech;
+    private subsystems subs;
 
     @Override
-    public void runOpMode() {
-        AllianceColor alliance = new AllianceColor(AllianceColor.Selection.BLUE);
-        mech = new subsystems(hardwareMap, alliance);
+    public void init() {
+        subs = new subsystems(hardwareMap, new AllianceColor(Selection.BLUE));
 
-        telemetry.addData("Status", "Initialized - Blue Alliance");
+        telemetry.addData("Alliance", "BLUE");
+        telemetry.addData("Status", "Initialized – Hold RT to Auto Aim + Shoot!");
         telemetry.update();
+    }
 
-        waitForStart();
+    @Override
+    public void loop() {
+        subs.drivetrain(gamepad1, gamepad2);
+        subs.shooterControl(gamepad2);
+        subs.pathsAndModes(gamepad1);
+        subs.cycle(gamepad2);
+        subs.updateLEDs();
 
-        while (opModeIsActive()) {
-            mech.drivetrain(gamepad1);
-            mech.intake(gamepad2);
-            mech.transfer(gamepad2);
-            mech.shooter(gamepad2);
-            mech.pathsAndModes(gamepad1);
-            mech.cycle(gamepad2);
-
-            mech.updateLEDs();
-
-            Pose pose = mech.getFollower().getPose();  // Now works with correct import
-
-            telemetry.addLine("=== ROBOT POSE ===");
-            telemetry.addData("X", "%.1f", pose.getX());
-            telemetry.addData("Y", "%.1f", pose.getY());
-            telemetry.addData("Heading °", "%.1f", Math.toDegrees(pose.getHeading()));
-
-            telemetry.addLine("\n=== SHOOTER ===");
-            telemetry.addData("State", subsystems.shooterState);
-            telemetry.addData("Target Velocity", "%.0f", mech.shooter.getTargetVelocity());
-            telemetry.addData("Defense", mech.defenseActive ? "ON" : "OFF");
-
-            telemetry.addLine("\n=== CYCLE ===");
-            telemetry.addData("State", mech.cycleState);
-            telemetry.addData("Shots", mech.artifactsShot + "/3");
-            if (mech.cycleState != subsystems.CycleState.IDLE) {
-                telemetry.addData("Timer s", "%.2f", mech.cycleTimer.seconds());
-            }
-
-            telemetry.addLine("\n=== MODES ===");
-            telemetry.addData("Auto Aim", mech.autoAimActive ? "ON" : "OFF");
-
-            String path = "None";
-            if (mech.goToNearActive) path = "Near";
-            else if (mech.goToFarActive) path = "Far";
-            else if (mech.goToGateActive) path = "Gate";
-            else if (mech.parkActive) path = "Park";
-            telemetry.addData("Path", path);
-            telemetry.addData("Following", mech.getFollower().isBusy() ? "YES" : "NO");
-
-            telemetry.addLine("\n=== MECHANISMS ===");
-            String intakeStatus = gamepad2.a ? "FWD" : gamepad2.y ? "BWD" : "OFF";
-            telemetry.addData("Intake", intakeStatus);
-
-            String transferStatus = gamepad2.x ? "FWD (Feed)" : gamepad2.b ? "BWD (Reload)" : "OFF";
-            telemetry.addData("Transfer", transferStatus);
-
-            telemetry.addLine("\n=== BUTTONS ===");
-            telemetry.addData("Dpad Up", gamepad1.dpad_up ? "► Near" : "");
-            telemetry.addData("Dpad Down", gamepad1.dpad_down ? "► Far" : "");
-            telemetry.addData("Dpad Left", gamepad1.dpad_left ? "► Gate" : "");
-            telemetry.addData("Dpad Right", gamepad1.dpad_right ? "► Park" : "");
-            telemetry.addData("B", gamepad1.b ? "► Pose Reset" : "");
-
-            telemetry.update();
-        }
+        telemetry.addData("Pose", subs.getFollower().getPose().toString());
+        telemetry.addData("Aiming Locked", subs.aimingLocked ? "YES (Stiff!)" : "Turning");
+        telemetry.addData("Shooter On", subs.shooterOn ? "YES" : "Off");
+        telemetry.addData("Cycle State", subs.cycleState);
+        telemetry.update();
     }
 }

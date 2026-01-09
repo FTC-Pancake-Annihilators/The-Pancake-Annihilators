@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.Mechanisms;
 
 import static org.firstinspires.ftc.teamcode.pedroPathing.Constants.follower;
 
-import com.pedropathing.control.PIDFController;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.MathFunctions;
@@ -10,101 +9,106 @@ import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.Mechanisms.Shooter;
-import org.firstinspires.ftc.teamcode.Mechanisms.ShooterState;
 import org.firstinspires.ftc.teamcode.Mechanisms.Transfer;
 import org.firstinspires.ftc.teamcode.util.AllianceColor;
 
 import java.util.function.Supplier;
 
 public class subsystems {
-    public Intake intake;
+
     public Shooter shooter;
     public Transfer transfer;
 
     public AllianceColor allianceColor;
 
-    public boolean autoAimActive = false;
+    private DcMotorEx leftFront, leftRear, rightFront, rightRear;
+
     public boolean goToNearActive = false;
     public boolean goToFarActive = false;
     public boolean goToGateActive = false;
     public boolean parkActive = false;
-    public boolean defenseActive = false;
 
     public enum CycleState { IDLE, FEED, WAIT_SETTLE, WAIT_SHOOT }
     public CycleState cycleState = CycleState.IDLE;
     public int artifactsShot = 0;
     public ElapsedTime cycleTimer = new ElapsedTime();
 
-    public static ShooterState shooterState = ShooterState.AUTO_AIM;
-
-    private static PIDFController headingPid;
-
-    // Made public for Auto OpModes
     public Supplier<PathChain> nearZonePath, farZonePath, parkPath, gatePath;
 
     private Servo prismLED;
 
-    // PWM positions (test & adjust on robot from manual table)
-    private static final double DEFAULT_ORANGE = 0.55;     // Solid orange idle
-    private static final double CYCLE_FLASH = 0.295;       // Emergency Lights flashing
-    private static final double DEFENSE_STROBE = 0.60;     // Purple/violet
-    private static final double SHOOTER_READY = 0.70;      // Green pulse/sine wave
-    private static final double PATH_RAINBOW = 1.0;        // Rainbow Snakes chase
+    private static final double DEFAULT_ORANGE = 0.55;
+    private static final double CYCLE_FLASH = 0.295;
+    private static final double DEFENSE_STROBE = 0.60;
+    private static final double SHOOTER_READY = 0.70;
+    private static final double PATH_RAINBOW = 1.0;
 
-    // Button tracking for toggles
-    private boolean lastLeftBumper = false;
-    private boolean lastRightBumper = false;
     private boolean lastRightTrigger = false;
+
+    private static final double HEADING_GAIN_AIM = 3.2;
+    private static final double HEADING_GAIN_STIFF = 6.0;
+    private static final double AIM_TOLERANCE = Math.toRadians(6);
+
+    private double targetHeading = 0;
+
+    private static final double GOAL_X_RED = 140.0;
+    private static final double GOAL_X_BLUE = 4.0;
+    private static final double GOAL_Y = 140.0;
+
+    public boolean shooterOn = false;
+    public boolean aimingLocked = false;
+
+    public subsystems() {
+        // Empty constructor for OpMode framework
+    }
 
     public subsystems(HardwareMap hwMap, AllianceColor color) {
         this.allianceColor = color;
 
-        intake = new Intake(hwMap);
         shooter = new Shooter(hwMap, Constants.shooterCoefficients);
         transfer = new Transfer(hwMap);
 
-        prismLED = hwMap.get(Servo.class, "prismLED");
+        leftFront = hwMap.get(DcMotorEx.class, "lf_Drive");
+        leftRear = hwMap.get(DcMotorEx.class, "lb_Drive");
+        rightFront = hwMap.get(DcMotorEx.class, "rf_Drive");
+        rightRear = hwMap.get(DcMotorEx.class, "rb_Drive");
 
-        if (headingPid == null) {
-            headingPid = new PIDFController(Constants.followerConstants.getCoefficientsHeadingPIDF());
-        }
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
+        leftRear.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        rightRear.setDirection(DcMotor.Direction.FORWARD);
+
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        prismLED = hwMap.get(Servo.class, "prismLED");
 
         definePaths();
 
-        // Send PWM signal early to avoid white boot / snake demo
         prismLED.setPosition(DEFAULT_ORANGE);
     }
 
     public void updateLEDs() {
         if (cycleState != CycleState.IDLE) {
             prismLED.setPosition(CYCLE_FLASH);
-            return;
-        }
-        if (defenseActive) {
-            prismLED.setPosition(DEFENSE_STROBE);
-            return;
-        }
-        if (shooterState == ShooterState.AUTO_AIM && autoAimActive) {
+        } else if (shooterOn && aimingLocked) {
             prismLED.setPosition(SHOOTER_READY);
-            return;
-        }
-        if (getFollower().isBusy()) {
+        } else if (follower.isBusy()) {
             prismLED.setPosition(PATH_RAINBOW);
-            return;
+        } else {
+            prismLED.setPosition(DEFAULT_ORANGE);
         }
-        prismLED.setPosition(DEFAULT_ORANGE);  // Solid orange idle
-    }
-
-    public com.pedropathing.follower.Follower getFollower() {
-        return follower;
     }
 
     private void definePaths() {
@@ -134,79 +138,64 @@ public class subsystems {
                 .build();
     }
 
-    public void drivetrain(Gamepad gp1) {
+    public void drivetrain(Gamepad gp1, Gamepad gp2) {
         follower.update();
 
         double forward = -gp1.left_stick_y;
-        double strafe = -gp1.left_stick_x;
-        double turn = -gp1.right_stick_x;
+        double strafe = gp1.left_stick_x;
+        double turnInput = gp1.right_stick_x;
 
-        double stickMagnitude = Math.hypot(strafe, forward) + Math.abs(turn);
+        double stickMagnitude = Math.hypot(forward, strafe) + Math.abs(turnInput);
 
-        // Cancel path if joystick >15%
         if (stickMagnitude > 0.15 && (goToNearActive || goToFarActive || goToGateActive || parkActive)) {
             goToNearActive = goToFarActive = goToGateActive = parkActive = false;
             follower.breakFollowing();
-            follower.startTeleopDrive(true);
         }
 
-        // Normal drive
-        if (!autoAimActive && !goToNearActive && !goToFarActive && !goToGateActive && !parkActive && !defenseActive) {
-            follower.setTeleOpDrive(forward, strafe, turn, false, allianceColor.isRed() ? 0 : Math.toRadians(180));
-        }
+        shooterOn = gp2.right_trigger > 0.1;
+        boolean manualDefense = gp1.right_bumper;
 
-        // Auto-face goal (toggle)
-        if (gp1.left_bumper && !lastLeftBumper) {
-            autoAimActive = !autoAimActive;
-        }
-        lastLeftBumper = gp1.left_bumper;
+        Pose currentPose = follower.getPose();
+        double botHeading = currentPose.getHeading();
 
-        if (autoAimActive) {
-            headingPid.updatePosition(follower.getHeading());
-            headingPid.setTargetPosition(getTargetHeading(follower.getPose().getX(), follower.getPose().getY(), allianceColor));
-            follower.setTeleOpDrive(forward, strafe, headingPid.run(), false, allianceColor.isRed() ? 0 : Math.toRadians(180));
-        }
+        double turnPower = turnInput;
+        aimingLocked = false;
 
-        updateLEDs();
-    }
+        if (shooterOn) {
+            double desiredHeading = getTargetHeading(currentPose.getX(), currentPose.getY());
+            double error = AngleWrap(desiredHeading - botHeading);
 
-    public void intake(Gamepad gp2) {
-        if (gp2.a) {
-            intake.intake();
-        } else if (gp2.y) {
-            intake.eject();
+            double gain = Math.abs(error) < AIM_TOLERANCE ? HEADING_GAIN_STIFF : HEADING_GAIN_AIM;
+            turnPower = gain * error;
+
+            aimingLocked = Math.abs(error) < AIM_TOLERANCE;
+        } else if (manualDefense) {
+            double error = AngleWrap(targetHeading - botHeading);
+            turnPower = HEADING_GAIN_STIFF * error;
         } else {
-            intake.stop();
-        }
-    }
-
-    public void transfer(Gamepad gp2) {
-        transfer.handleTimedAdvancers();
-    }
-
-    public void shooter(Gamepad gp2) {
-        // Toggle defense + shooter
-        if (gp2.right_bumper && !lastRightBumper) {
-            defenseActive = !defenseActive;
-            shooterState = ShooterState.AUTO_AIM;
-        }
-        lastRightBumper = gp2.right_bumper;
-
-        if (defenseActive) {
-            shooter.adaptive(follower.getPose().getX(), follower.getPose().getY(), allianceColor);
-            headingPid.updatePosition(follower.getHeading());
-            headingPid.setTargetPosition(allianceColor.isRed() ? Math.toRadians(90) : Math.toRadians(-90));
+            turnPower = turnInput;
+            targetHeading = botHeading;
         }
 
-        if (shooterState == ShooterState.AUTO_AIM) {
-            shooter.adaptive(follower.getPose().getX(), follower.getPose().getY(), allianceColor);
+        if (!follower.isBusy()) {
+            leftFront.setPower(forward + strafe + turnPower);
+            leftRear.setPower(forward - strafe + turnPower);
+            rightFront.setPower(forward - strafe - turnPower);
+            rightRear.setPower(forward + strafe - turnPower);
         }
 
         updateLEDs();
+    }
+
+    public void shooterControl(Gamepad gp2) {
+        if (shooterOn) {
+            shooter.adaptive(follower.getPose().getX(), follower.getPose().getY(), allianceColor);
+        } else {
+            shooter.stop();
+        }
     }
 
     public void pathsAndModes(Gamepad gp1) {
-        // Paths (press to start)
         if (gp1.dpad_up && !goToNearActive) {
             goToNearActive = true;
             cancelPathModes();
@@ -232,16 +221,12 @@ public class subsystems {
             follower.followPath(parkPath.get());
         }
 
-        // Pose reset (alliance-specific)
         if (gp1.b) {
-            if (allianceColor.isRed()) {
-                follower.setPose(new Pose(8, 8, Math.toRadians(90)));
-            } else {
-                follower.setPose(new Pose(135, 8, Math.toRadians(90)));
-            }
+            follower.setPose(allianceColor.isRed()
+                    ? new Pose(8, 8, Math.toRadians(90))
+                    : new Pose(135, 8, Math.toRadians(90)));
         }
 
-        // Auto-complete
         if ((goToNearActive || goToFarActive || goToGateActive || parkActive) && !follower.isBusy()) {
             goToNearActive = goToFarActive = goToGateActive = parkActive = false;
         }
@@ -254,7 +239,6 @@ public class subsystems {
     }
 
     public void cycle(Gamepad gp2) {
-        // Toggle cycle
         if (gp2.right_trigger > 0.5 && !lastRightTrigger) {
             if (cycleState == CycleState.IDLE) {
                 cycleState = CycleState.FEED;
@@ -302,11 +286,18 @@ public class subsystems {
         updateLEDs();
     }
 
-    private static double getTargetHeading(double x, double y, AllianceColor alliance) {
-        if (alliance.isRed()) {
-            return MathFunctions.normalizeAngle(Math.atan2(144 - y, 144 - x) + Math.toRadians(91.5));
-        } else {
-            return MathFunctions.normalizeAngle(Math.atan2(144 - y, 0 - x) + Math.toRadians(90));
-        }
+    private double getTargetHeading(double robotX, double robotY) {
+        double goalX = allianceColor.isRed() ? GOAL_X_RED : GOAL_X_BLUE;
+        double deltaX = goalX - robotX;
+        double deltaY = GOAL_Y - robotY;
+        return MathFunctions.normalizeAngle(Math.atan2(deltaY, deltaX));
+    }
+
+    private double AngleWrap(double angle) {
+        return MathFunctions.normalizeAngle(angle);
+    }
+
+    public com.pedropathing.follower.Follower getFollower() {
+        return follower;
     }
 }
