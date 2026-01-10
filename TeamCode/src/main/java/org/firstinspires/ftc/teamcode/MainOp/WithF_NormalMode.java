@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@TeleOp(name = "Master_Bot_Prism_PWM_NoSensors")
+@TeleOp(name = "With LEDS", group = "AAAA")
 public class WithF_NormalMode extends OpMode {
     // Hardware
     public DcMotorEx lf, rf, lb, rb, shooter;
@@ -144,6 +144,9 @@ public class WithF_NormalMode extends OpMode {
         } else {
             prismLED.setPosition(DEFAULT_ORANGE); // Orange idle
         }
+        // Priority 5: Shooter Ready
+            prismLED.setPosition(SHOOTER_READY); // Green pulse
+            prismLED.setPosition(DEFAULT_ORANGE); // Orange idle
     }
 
     private AprilTagDetection getTargetTag() {
