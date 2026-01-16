@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.Mechanisms.subsystems;
 import org.firstinspires.ftc.teamcode.util.AllianceColor;
 import org.firstinspires.ftc.teamcode.util.AllianceColor.Selection;
 
-@TeleOp(name = "PP-Red", group = "Competition")
+@TeleOp(name = "PP-Red", group = "PP")
 public class PPRed extends OpMode {
 
     private subsystems subs;

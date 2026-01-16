@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Mechanisms.subsystems;
 import org.firstinspires.ftc.teamcode.util.AllianceColor;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "PP-Red-Near", group = "Competition")
+@Autonomous(name = "RedNear-PP", group = "Competition")
 public class RedNearAuto extends LinearOpMode {
 
     subsystems mech;

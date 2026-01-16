@@ -2,10 +2,11 @@ package org.firstinspires.ftc.teamcode.MainAuto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-
+@TeleOp(name ="FoFront",group = "normal Auto")
 public class Auto_goFront extends OpMode {
 
     private DcMotorEx lf_Drive;

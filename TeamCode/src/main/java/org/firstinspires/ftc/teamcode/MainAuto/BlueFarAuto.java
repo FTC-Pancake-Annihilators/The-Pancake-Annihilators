@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.Mechanisms.subsystems;
 import org.firstinspires.ftc.teamcode.util.AllianceColor;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-@Autonomous(name = "Blue Far Auto", group = "Competition")
+@Autonomous(name = "BlueFar-PP", group = "PP")
 public class BlueFarAuto extends LinearOpMode {
 
     subsystems mech;

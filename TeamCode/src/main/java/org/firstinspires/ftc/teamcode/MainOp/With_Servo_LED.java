@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@TeleOp(name = "Bot_2_Servo_LED_Logic")
 public class With_Servo_LED extends OpMode {
     public DcMotorEx lf_Drive, lb_Drive, rf_Drive, rb_Drive;
     public DcMotorEx shooter;
