@@ -37,8 +37,8 @@ public class Bot_2_withF extends OpMode {
     // Tuning
     double minDis = 53;        // minimum distance (mm)
     double maxDis = 121;// maximum distance (mm)
-    double minVelo = 2400;     // min shooter velocity
-    double maxVelo = 2780;    // max shooter velocity
+    double minVelo = 2380;     // min shooter velocity
+    double maxVelo = 2800;    // max shooter velocity
     final double TURN_GAIN = 0.02, MAX_AUTO_TURN = 0.4;
 
 

@@ -53,10 +53,10 @@ public class Constants {
             .rightRearMotorName("rb_Drive")
             .leftRearMotorName("lb_Drive")
             .leftFrontMotorName("lf_Drive")
-            .leftFrontMotorDirection(DcMotorEx.Direction.REVERSE)
-            .leftRearMotorDirection(DcMotorEx.Direction.REVERSE)
-            .rightFrontMotorDirection(DcMotorEx.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotorEx.Direction.FORWARD);
+            .leftFrontMotorDirection(DcMotorEx.Direction.FORWARD)
+            .leftRearMotorDirection(DcMotorEx.Direction.FORWARD)
+            .rightFrontMotorDirection(DcMotorEx.Direction.REVERSE)
+            .rightRearMotorDirection(DcMotorEx.Direction.REVERSE);
 //            .xVelocity()
 //            .yVelocity();
 
@@ -70,10 +70,10 @@ public class Constants {
             .rightRearMotorName("rb_Drive")
             .leftRearMotorName("lb_Drive")
             .leftFrontMotorName("lf_Drive")
-            .leftFrontEncoderDirection(Encoder.FORWARD)
-            .leftRearEncoderDirection(Encoder.FORWARD)
-            .rightFrontEncoderDirection(Encoder.FORWARD)
-            .rightRearEncoderDirection(Encoder.FORWARD)
+            .leftFrontEncoderDirection(Encoder.REVERSE)
+            .leftRearEncoderDirection(Encoder.REVERSE)
+            .rightFrontEncoderDirection(Encoder.REVERSE)
+            .rightRearEncoderDirection(Encoder.REVERSE)
             .robotLength(14.25)
             .robotWidth(17.6);
 //            .forwardTicksToInches(-61.7)
