@@ -33,9 +33,11 @@ public class WithF_NormalMode extends OpMode {
     private boolean lastRB2 = false, lastLB1 = false, lastX2 = false, lastB2 = false;
 
     // Constants
-    final double minD = 53, maxD = 121;
-    final double minV = 2400, maxV = 2780;
+//    final double minD = 53, maxD = 121;
+//    final double minV = 2400, maxV = 2780;
 
+      final double minD = 53, maxD = 114;
+  final double minV = 1600, maxV = 2100;
     private webCamOp camera;
 
     // LED PWM positions
