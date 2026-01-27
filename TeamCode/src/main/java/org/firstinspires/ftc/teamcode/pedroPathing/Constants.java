@@ -7,9 +7,10 @@ import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
 import com.pedropathing.ftc.localization.Encoder;
-import com.pedropathing.ftc.localization.constants.DriveEncoderConstants;
+import com.pedropathing.ftc.localization.constants.ThreeWheelIMUConstants;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathConstraints;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -41,12 +42,53 @@ public class Constants {
     public static final double midFieldVelocity = 220.0;
     public static final double farVelocity = 280.0;
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(7)
+            .mass(15)
             .useSecondaryTranslationalPIDF(true)
             .useSecondaryHeadingPIDF(true)
             .useSecondaryDrivePIDF(true);
-//            .forwardZeroPowerAcceleration(deceleration)
-//            .lateralZeroPowerAcceleration(deceleration);
+//.forwardZeroPowerAcceleration(-25.9346931313679598)
+//            .lateralZeroPowerAcceleration(-67.342491844080064)
+//            .translationalPIDFCoefficients(new PIDFCoefficients(
+//                                                   0.03,
+//                    0,
+//                                                   0,
+//                                                   0.015
+//    ))
+//            .translationalPIDFSwitch(4)
+//            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(
+//                                                            0.4,
+//                    0,
+//                                                            0.005,
+//                                                            0.0006
+//    ))
+//            .headingPIDFCoefficients(new PIDFCoefficients(
+//                                             0.8,
+//                    0,
+//                                             0,
+//                                             0.01
+//    ))
+//            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(
+//                                                      2.5,
+//                            0,
+//                                                      0.1,
+//                                                      0.0005
+//    ))
+//            .drivePIDFCoefficients(new FilteredPIDFCoefficients(
+//                                           0.1,
+//                            0,
+//                                           0.00035,
+//                                           0.6,
+//                                           0.015
+//    ))
+//            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(
+//                                                    0.02,
+//                    0,
+//                                                    0.000005,
+//                                                    0.6,
+//                                                    0.01
+//    ))
+//            .drivePIDFSwitch(15)
+//            .centripetalScaling(0.0005);
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
             .rightFrontMotorName("rf_Drive")
@@ -65,26 +107,21 @@ public class Constants {
 
 
 
-    public static DriveEncoderConstants localizerConstants = new DriveEncoderConstants()
-            .rightFrontMotorName("rf_Drive")
-            .rightRearMotorName("rb_Drive")
-            .leftRearMotorName("lb_Drive")
-            .leftFrontMotorName("lf_Drive")
-            .leftFrontEncoderDirection(Encoder.FORWARD)
-            .leftRearEncoderDirection(Encoder.FORWARD)
-            .rightFrontEncoderDirection(Encoder.FORWARD)
-            .rightRearEncoderDirection(Encoder.FORWARD)
-            .robotLength(14.25)
-            .robotWidth(17.6);
-//            .forwardTicksToInches(-61.7)
-//            .strafeTicksToInches(-2.08)
-//            .turnTicksToInches(-0.02);
-// DO the localization Test
-// Run the Tuning OpMode, then navigate under to Localization Test
-//On your computer, connect to your robot's Wi-Fi, and navigate to Panels or the FTC Dashboard. Panels is accessible at the ip address 192.168.43.1:8001 when connected to robot wifi.
-//You should see the robot's position on the field.
-//Observe the movements, make sure moving forward increases x and strafing left increases y.
-
+    public static ThreeWheelIMUConstants localizerConstants = new ThreeWheelIMUConstants()
+//            .forwardTicksToInches(.001989436789)
+//            .strafeTicksToInches(.001989436789)
+//            .turnTicksToInches(.001989436789)
+            .leftPodY(1)
+            .rightPodY(-1)
+            .strafePodX(-2.5)
+            .leftEncoder_HardwareMapName("leftFront")
+            .rightEncoder_HardwareMapName("rightRear")
+            .strafeEncoder_HardwareMapName("rightFront")
+            .leftEncoderDirection(Encoder.REVERSE)
+            .rightEncoderDirection(Encoder.FORWARD)
+            .strafeEncoderDirection(Encoder.REVERSE)
+            .IMU_HardwareMapName("imu")
+            .IMU_Orientation(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
     public static PathConstraints pathConstraints = new PathConstraints(
             0.99, 100, 1, 1);
 
@@ -93,9 +130,9 @@ public class Constants {
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
+                .threeWheelIMULocalizer(localizerConstants)
                 .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
-                .driveEncoderLocalizer(localizerConstants)
                 .build();
     }
 }
