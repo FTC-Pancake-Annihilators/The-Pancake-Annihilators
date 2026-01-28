@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@TeleOp(name = "Bot_2_Official_LED_Logic")
+
 public class With_LED extends OpMode {
     public DcMotorEx lf_Drive, lb_Drive, rf_Drive, rb_Drive;
     public DcMotorEx shooter;
@@ -26,8 +26,9 @@ public class With_LED extends OpMode {
     private boolean lastX2 = false, lastB2 = false;
     private double targetShooterVelocity = 0;
 
-    final double minDis = 53, maxDis = 121, minVelo = 2400, maxVelo = 2780;
-    final double TURN_GAIN = 0.02, MAX_AUTO_TURN = 0.4;
+//    final double minDis = 53, maxDis = 121, minVelo = 2400, maxVelo = 2800;
+    final double minDis = 40, maxDis = 130, minVelo=1900,maxVelo=2500;
+final double TURN_GAIN = 0.02, MAX_AUTO_TURN = 0.4;
 
     private webCamOp camera;
 
@@ -67,6 +68,8 @@ public class With_LED extends OpMode {
 
         handleTimedAdvancers();
         updateLEDs();
+        telemetry.addData("ActualVelo", shooter.getVelocity());
+
     }
 
     public void updateLEDs() {

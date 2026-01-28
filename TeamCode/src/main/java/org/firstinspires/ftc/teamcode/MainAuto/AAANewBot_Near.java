@@ -20,7 +20,7 @@ public class AAANewBot_Near extends LinearOpMode {
         waitForStart();
 
         if (!opModeIsActive()) return;
-        drive(false, 1750);
+        drive(false, 1950);
         // Fire 3 shots
         fire();
         sleep(2500);
@@ -41,7 +41,7 @@ public class AAANewBot_Near extends LinearOpMode {
         if (!opModeIsActive()) return;
 
         // Spin shooter up
-        mecanum.shooter.setVelocity(2450);
+        mecanum.shooter.setVelocity(1600);
 
         ElapsedTime timer = new ElapsedTime();
 
