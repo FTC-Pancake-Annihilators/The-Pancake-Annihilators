@@ -19,7 +19,7 @@ public class AAANewBotAutoother extends LinearOpMode {
         waitForStart();
 
         if (!opModeIsActive()) return;
-
+        drive(false,true,200);
         // Fire 3 shots
         fire();
         sleep(1500);
@@ -31,7 +31,7 @@ public class AAANewBotAutoother extends LinearOpMode {
         mecanum.shooter.setVelocity(0);
 
         // Drive backwards
-        drive(true, 3000);
+        drive(true, false,3000);
     }
 
     /** FIRE ONE RING **/
@@ -67,7 +67,7 @@ public class AAANewBotAutoother extends LinearOpMode {
     }
 
     /** DRIVE STRAIGHT OR TURN **/
-    public void drive(boolean turn, long millis) {
+    public void drive(boolean turn,boolean alignturn, long millis) {
 
         if (!opModeIsActive()) return;
 
@@ -77,7 +77,12 @@ public class AAANewBotAutoother extends LinearOpMode {
             mecanum.rb_Drive.setPower(0.5);
             mecanum.lf_Drive.setPower(0.5);
             mecanum.rf_Drive.setPower(-0.5);
-        } else {
+        }else if (alignturn) {
+            mecanum.lb_Drive.setPower(0.2);
+            mecanum.rb_Drive.setPower(0);
+            mecanum.lf_Drive.setPower(0.2);
+            mecanum.rf_Drive.setPower(0);
+        }else {
             // Straight motion
             mecanum.lb_Drive.setPower(0);
             mecanum.rb_Drive.setPower(0);
