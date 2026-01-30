@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 
 
-@Autonomous(name="NearRedAUTO")
+@Autonomous(name="Near_Red", group = "normal Auto")
 public class AAANewBot_Near extends LinearOpMode {
 
     Mecanum_Config mecanum;

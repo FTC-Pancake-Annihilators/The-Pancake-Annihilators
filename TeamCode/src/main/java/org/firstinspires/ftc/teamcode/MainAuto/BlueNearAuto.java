@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.Mechanisms.subsystems;
 import org.firstinspires.ftc.teamcode.util.AllianceColor;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-@Autonomous(name = "PP-Blue-Near", group = "Competition")
+@Autonomous(name = "BlueNear-PP", group = "Competition")
 public class BlueNearAuto extends LinearOpMode {
 
     subsystems mech;

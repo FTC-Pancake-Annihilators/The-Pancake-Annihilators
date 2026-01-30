@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@TeleOp(name = "Master_Bot_Servo_LED_Mode")
+
 public class WithF_ServoMode extends OpMode {
     // Introducing all the Hardware
     public DcMotorEx lf, rf, lb, rb, shooter;
