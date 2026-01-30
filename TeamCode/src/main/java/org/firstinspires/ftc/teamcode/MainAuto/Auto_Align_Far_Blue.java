@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 
-@Autonomous(name="Far_blue",group = "normal Auto")
-public class BallTryblue extends LinearOpMode {
+@Autonomous(name="Far_Blue_Auto_Align", group = "AAA")
+public class Auto_Align_Far_Blue extends LinearOpMode {
 
     Mecanum_Config mecanum;
 
@@ -19,60 +19,55 @@ public class BallTryblue extends LinearOpMode {
         waitForStart();
 
         if (!opModeIsActive()) return;
-        // drive straight
-        drive(false,false,false,400);
-        //turn to align the intake to intake.
-        drive(false,true,false,300);
-        //drive to intake and intake.
-        mecanum.IntakeMotor.setPower(1);
+        drive(false,true,200);
         // Fire 3 shots
         fire();
-        sleep(1500);
+        sleep(2500);
         fire();
-        sleep(1500);
+        sleep(2500);
         fire();
 
         // Turn shooter off
         mecanum.shooter.setVelocity(0);
 
-        // Drive backwards
-        drive(true, false,false,3000);// change this later
+        // Strafe to color side
+        drive(true, false, 3000);
     }
 
-
+    /** FIRE ONE ARTF **/
     public void fire() {
 
         if (!opModeIsActive()) return;
 
         // Spin shooter up
-        mecanum.shooter.setVelocity(mecanum.shooter_Velo);
+        mecanum.shooter.setVelocity(2000);
 
         ElapsedTime timer = new ElapsedTime();
 
-        // Warm up shooter WITH SAFETY
+
         while (opModeIsActive()
-                && mecanum.shooter.getVelocity() < mecanum.minimumVelo
+                && mecanum.shooter.getVelocity() < 1990
                 && timer.seconds() < 2.5) {
             sleep(5);
         }
 
         if (!opModeIsActive()) return;
 
-
+        // Feed ONE ARTF
         mecanum.leftAdvancer.setPower(-mecanum.advancerPwr);
         mecanum.rightAdvancer.setPower(-mecanum.advancerPwr);
         //mecanum.IntakeMotor.setPower(-1);
 
-        sleep(800);  // enough for 1 ring
+        sleep(635);  // enough for 1 ARTF
 
-        // Stop feed motors
+        // Stop feed Servos
         mecanum.leftAdvancer.setPower(0);
         mecanum.rightAdvancer.setPower(0);
         //mecanum.IntakeMotor.setPower(0);
     }
 
     /** DRIVE STRAIGHT OR TURN **/
-    public void drive(boolean turn,boolean reverseturn,boolean alignturn, long millis) {
+    public void drive(boolean turn, boolean alignturn, long millis) {
 
         if (!opModeIsActive()) return;
 
@@ -80,28 +75,19 @@ public class BallTryblue extends LinearOpMode {
             // Rotation
             mecanum.lb_Drive.setPower(-0.5);
             mecanum.rb_Drive.setPower(0.5);
-            mecanum.lf_Drive.setPower(-0.5);
-            mecanum.rf_Drive.setPower(0.5);
-
-        }
-        else if (reverseturn) {
-            mecanum.lb_Drive.setPower(0.5);
-            mecanum.rb_Drive.setPower(-0.5);
             mecanum.lf_Drive.setPower(0.5);
             mecanum.rf_Drive.setPower(-0.5);
-        }
-
-        else if (alignturn) {
+        } else if (alignturn) {
             mecanum.lb_Drive.setPower(0.2);
             mecanum.rb_Drive.setPower(0);
             mecanum.lf_Drive.setPower(0.2);
             mecanum.rf_Drive.setPower(0);
         } else {
-            // Straight motion
-            mecanum.lb_Drive.setPower(-0.5);
-            mecanum.rb_Drive.setPower(-0.5);
-            mecanum.lf_Drive.setPower(-0.5);
-            mecanum.rf_Drive.setPower(-0.5);
+            // no motion
+            mecanum.lb_Drive.setPower(0);
+            mecanum.rb_Drive.setPower(0);
+            mecanum.lf_Drive.setPower(0);
+            mecanum.rf_Drive.setPower(0);
         }
 
         sleep(millis);

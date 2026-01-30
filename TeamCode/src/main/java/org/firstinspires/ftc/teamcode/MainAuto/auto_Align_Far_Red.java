@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 
-@Autonomous(name="Far_Red", group = "AAA")
-public class AAANewBotAuto extends LinearOpMode {
+@Autonomous(name="Far_Red_Auto_Align", group = "AAA")
+public class auto_Align_Far_Red extends LinearOpMode {
 
     Mecanum_Config mecanum;
 
@@ -30,37 +30,37 @@ public class AAANewBotAuto extends LinearOpMode {
         // Turn shooter off
         mecanum.shooter.setVelocity(0);
 
-        // Drive backwards
+        // Strafe to color side
         drive(true, false, 3000);
     }
 
-    /** FIRE ONE RING **/
+    /** FIRE ONE ARTF **/
     public void fire() {
 
         if (!opModeIsActive()) return;
 
         // Spin shooter up
-        mecanum.shooter.setVelocity(mecanum.shooter_Velo);
+        mecanum.shooter.setVelocity(2000);
 
         ElapsedTime timer = new ElapsedTime();
 
-        // Warm up shooter WITH SAFETY
+
         while (opModeIsActive()
-                && mecanum.shooter.getVelocity() < mecanum.minimumVelo
+                && mecanum.shooter.getVelocity() < 1990
                 && timer.seconds() < 2.5) {
             sleep(5);
         }
 
         if (!opModeIsActive()) return;
 
-        // Feed ONE ring
+        // Feed ONE ARTF
         mecanum.leftAdvancer.setPower(-mecanum.advancerPwr);
         mecanum.rightAdvancer.setPower(-mecanum.advancerPwr);
         //mecanum.IntakeMotor.setPower(-1);
 
-        sleep(635);  // enough for 1 ring
+        sleep(635);  // enough for 1 ARTF
 
-        // Stop feed motors
+        // Stop feed Servos
         mecanum.leftAdvancer.setPower(0);
         mecanum.rightAdvancer.setPower(0);
         //mecanum.IntakeMotor.setPower(0);

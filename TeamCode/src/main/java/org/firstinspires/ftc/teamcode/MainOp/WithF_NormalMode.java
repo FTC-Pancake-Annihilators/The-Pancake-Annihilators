@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-
+@TeleOp(name = "With_LED", group = "A")
 public class WithF_NormalMode extends OpMode {
 
     // Hardware

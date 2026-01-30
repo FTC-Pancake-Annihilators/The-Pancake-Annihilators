@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@TeleOp(name = "AAAABot_2_withF")
+@TeleOp(name = "Camera_Speed_Align", group = "B")
 public class Bot_2_withF extends OpMode {
     public DcMotorEx lf_Drive, lb_Drive, rf_Drive, rb_Drive;
     public DcMotorEx shooter;
@@ -35,10 +35,8 @@ public class Bot_2_withF extends OpMode {
     private double targetShooterVelocity = 0;
 
     // Tuning
-    double minDis = 53;        // minimum distance (mm)
-    double maxDis = 121;// maximum distance (mm)
-    double minVelo = 2380;     // min shooter velocity
-    double maxVelo = 2800;    // max shooter velocity
+    final double minDis = 53, maxDis = 114;
+    final double minVelo = 1600, maxVelo = 2025;     // max shooter velocity
     final double TURN_GAIN = 0.02, MAX_AUTO_TURN = 0.4;
 
 

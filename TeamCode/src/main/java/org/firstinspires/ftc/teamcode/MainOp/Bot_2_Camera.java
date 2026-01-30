@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Config;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 
-@TeleOp(name = "AAAABot_2_Cam")
+@TeleOp(name = "Camrera_Speed_Only", group = "C")
 public class Bot_2_Camera extends OpMode {
     public DcMotorEx lf_Drive;
     public DcMotorEx lb_Drive;
@@ -36,10 +36,8 @@ public class Bot_2_Camera extends OpMode {
 
     // Shooter Velo
     // Distance and velocity ranges
-    double minDis = 53;        // minimum distance (mm)
-    double maxDis = 121;// maximum distance (mm)
-    double minVelo = 2400;     // min shooter velocity
-    double maxVelo = 2780;    // max shooter velocity
+    final double minDis = 53, maxDis = 114;
+    final double minVelo = 1600, maxVelo = 2025;    // max shooter velocity
 
     private webCamOp camera;
 

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 
-@Autonomous(name="Far_blue",group = "normal Auto")
+@Autonomous(name="Far_blue",group = "AAA")
 public class AAANewBotAutoother extends LinearOpMode {
 
     Mecanum_Config mecanum;
@@ -30,11 +30,11 @@ public class AAANewBotAutoother extends LinearOpMode {
         // Turn shooter off
         mecanum.shooter.setVelocity(0);
 
-        // Drive backwards
+        // Drive
         drive(true, false,3000);
     }
 
-    /** FIRE ONE RING **/
+    /** FIRE ONE Artf **/
     public void fire() {
 
         if (!opModeIsActive()) return;
@@ -44,7 +44,7 @@ public class AAANewBotAutoother extends LinearOpMode {
 
         ElapsedTime timer = new ElapsedTime();
 
-        // Warm up shooter WITH SAFETY
+
         while (opModeIsActive()
                 && mecanum.shooter.getVelocity() < mecanum.minimumVelo
                 && timer.seconds() < 2.5) {
@@ -53,12 +53,12 @@ public class AAANewBotAutoother extends LinearOpMode {
 
         if (!opModeIsActive()) return;
 
-        // Feed ONE ring
+        // Feed ONE Artf
         mecanum.leftAdvancer.setPower(-mecanum.advancerPwr);
         mecanum.rightAdvancer.setPower(-mecanum.advancerPwr);
         //mecanum.IntakeMotor.setPower(-1);
 
-        sleep(800);  // enough for 1 ring
+        sleep(635);  // enough for 1 Artf
 
         // Stop feed motors
         mecanum.leftAdvancer.setPower(0);

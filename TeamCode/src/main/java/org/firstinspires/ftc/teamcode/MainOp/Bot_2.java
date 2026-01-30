@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Config;
 
-@TeleOp(name = "AAAABot_2")
+@TeleOp(name = "Normal_without_CAM",group = "D")
 public class Bot_2 extends OpMode {
     public DcMotorEx lf_Drive;
     public DcMotorEx lb_Drive;
@@ -34,7 +34,7 @@ public class Bot_2 extends OpMode {
     private String advancerStatus = "OFF";
 
     // Shooter Velo
-    private final double shooter_Velo = 2780; // 1750 -> 1850 -> 13000 -> 20000 ->
+    private final double shooter_Velo = 2025; // 1750 -> 1850 -> 13000 -> 20000 ->
 
 
 

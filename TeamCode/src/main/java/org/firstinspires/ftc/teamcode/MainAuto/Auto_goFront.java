@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-@TeleOp(name ="FoFront",group = "normal Auto")
+@TeleOp(name ="GoFront",group = "AAA")
 public class Auto_goFront extends OpMode {
 
     private DcMotorEx lf_Drive;

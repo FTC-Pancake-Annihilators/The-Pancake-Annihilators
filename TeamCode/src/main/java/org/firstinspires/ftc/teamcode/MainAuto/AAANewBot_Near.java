@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Mecanum_Config;
 
 
-@Autonomous(name="Near_Red", group = "normal Auto")
+@Autonomous(name="Near_Red", group = "AAA")
 public class AAANewBot_Near extends LinearOpMode {
 
     Mecanum_Config mecanum;
@@ -59,7 +59,7 @@ public class AAANewBot_Near extends LinearOpMode {
         mecanum.rightAdvancer.setPower(-mecanum.advancerPwr);
         //mecanum.IntakeMotor.setPower(-1);
 
-        sleep(650);  // enough for 1 ring
+        sleep(635);  // enough for 1 ring
 
         // Stop feed motors
         mecanum.leftAdvancer.setPower(0);
